@@ -1,0 +1,7 @@
+NAME="Neve"
+ID="neve"
+PRETTY_NAME="Neve Linux"
+HOME_URL="https://neve-linux.fmpt.org"
+DOCUMENTATION_URL="https://neve-linux.fmpt.org/docs"
+LOGO="neve-logo"
+ANSI_COLOR="0;38;2;214;79;93"
