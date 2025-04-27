@@ -15,3 +15,6 @@ bootstrap.*
 
 # custom configs
 .nvim.lua
+
+# MacOS
+.DS.Store
