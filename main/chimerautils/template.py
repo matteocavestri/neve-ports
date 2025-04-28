@@ -1,6 +1,6 @@
 pkgname = "chimerautils"
 pkgver = "14.2.2"
-pkgrel = 0
+pkgrel = 1
 build_style = "meson"
 configure_args = [
     "--libexecdir=/usr/lib/chimerautils",
