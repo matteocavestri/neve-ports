@@ -35,6 +35,8 @@ def _(self):
         "procps",
         "turnstile",
         "musl-locales",
+        "mandoc",
+        "man-pages",
     ]
     return []
 
@@ -100,19 +102,6 @@ def _(self):
     self.depends = [
         "base-kernel",
         "initramfs-tools",
-    ]
-    return []
-
-
-@subpackage("base-full-man")
-def _(self):
-    self.subdesc = "manpages"
-    self.install_if = [self.parent]
-    # transitional
-    self.provides = [self.with_pkgver("base-core-man")]
-    self.depends = [
-        "base-man",
-        "man-pages",
     ]
     return []
 
