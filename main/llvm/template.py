@@ -138,13 +138,11 @@ match self.profile().arch:
         _arch = "X86"
     case "aarch64":
         _arch = "AArch64"
-    case "ppc64le" | "ppc64" | "ppc":
+    case "ppc64le" | "ppc64":
         _arch = "PowerPC"
     case "riscv64":
         _arch = "RISCV64"
-    case "armhf" | "armv7":
-        _arch = "ARM"
-    case "loongarch64" | "loongarch32":
+    case "loongarch64":
         _arch = "LoongArch"
     case _:
         broken = f"Unknown CPU architecture: {self.profile().arch}"
