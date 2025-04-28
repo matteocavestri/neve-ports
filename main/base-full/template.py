@@ -34,6 +34,7 @@ def _(self):
         "dinit-chimera",
         "procps",
         "turnstile",
+        "musl-locales",
     ]
     return []
 
@@ -84,7 +85,7 @@ def _(self):
         "dosfstools",
     ]
     match self.rparent.profile().arch:
-        case "ppc64" | "ppc":
+        case "ppc64":
             # ppc mac disk tools
             self.depends += ["hfsutils", "mac-fdisk"]
     return []
@@ -99,16 +100,6 @@ def _(self):
     self.depends = [
         "base-kernel",
         "initramfs-tools",
-    ]
-    return []
-
-
-@subpackage("base-full-locale")
-def _(self):
-    self.subdesc = "locale"
-    self.install_if = [self.parent]
-    self.depends = [
-        "base-locale",
     ]
     return []
 
