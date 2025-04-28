@@ -139,7 +139,6 @@ def _(self):
         "chrony",
         "file",
         "less",
-        "nano",
         "pciutils",
         "syslog-ng",
         "opendoas",
