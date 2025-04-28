@@ -1,6 +1,6 @@
 pkgname = "base-files"
 pkgver = "0.1"
-pkgrel = 0
+pkgrel = 1
 _netbase_ver = "6.5"
 replaces = []
 # highest priority dir owner

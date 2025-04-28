@@ -17,4 +17,4 @@ bootstrap.*
 .nvim.lua
 
 # MacOS
-.DS.Store
+.DS_Store

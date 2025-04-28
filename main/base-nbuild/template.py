@@ -1,6 +1,6 @@
 pkgname = "base-nbuild"
 pkgver = "0.1"
-pkgrel = 0
+pkgrel = 1
 build_style = "meta"
 pkgdesc = "Core package set for cbuild containers"
 license = "custom:meta"
