@@ -79,6 +79,7 @@ def post_build(self):
     self.cp(self.files_path / "getent.c", ".")
     self.cp(self.files_path / "getconf.c", ".")
     self.cp(self.files_path / "iconv.c", ".")
+    self.cp(self.files_path / "__stack_chk_fail_local.c", ".")
 
     cc = compiler.C(self)
     cc.invoke(["getent.c"], "getent")
