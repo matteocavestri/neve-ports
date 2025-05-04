@@ -1,9 +1,10 @@
 pkgname = "base-files"
-pkgver = "0.0"
+pkgver = "0.1"
 pkgrel = 1
 _netbase_ver = "6.5"
 # highest priority dir owner
 replaces_priority = 65535
+# replaces = ["dinit-chimera<0.99.11-r2", "gcompat<1.1.0-r2"]
 pkgdesc = "Neve Linux base system files"
 license = "custom:meta"
 url = "https://neve-linux.fmpt.org"
