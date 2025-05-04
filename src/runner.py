@@ -1909,8 +1909,8 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
         if do_raw:
             return True
         # add base-nbuild "dependency" for correct implicit sorting
-        if not cbinit and pn not in cbvisit and pn != "main/base-nbuild":
-            depg.add(pn, "main/base-nbuild")
+        if not cbinit and pn not in cbvisit and pn != "main/base-cbuild":
+            depg.add(pn, "main/base-cbuild")
         # now add the rest of the stuff
         return _add_deps_graph(
             pn,
@@ -1935,9 +1935,9 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
     # first add base-nbuild, since that's an "implicit" dependency
     # of whatever we add in the transaction (other than cycles)
     handle_recdeps(
-        "main/base-nbuild",
+        "main/base-cbuild",
         template.Template(
-            "main/base-nbuild",
+            "main/base-cbuild",
             tarch,
             True,
             False,
