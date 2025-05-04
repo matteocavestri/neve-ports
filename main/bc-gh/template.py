@@ -4,7 +4,7 @@ pkgrel = 1
 build_style = "makefile"
 make_check_target = "test"
 make_use_env = True
-replaces = ["chimerautils-extra<=14.0.1-r0"]
+replaces = ["neveutils-extra<=14.0.1-r0"]
 pkgdesc = "Implementation of POSIX bc with GNU extensions"
 license = "BSD-2-Clause"
 url = "https://git.yzena.com/gavin/bc"
@@ -43,7 +43,7 @@ def post_install(self):
 
 @subpackage("bc-gh-man")
 def _(self):
-    self.replaces = ["chimerautils-extra-man<=14.0.1-r0"]
+    self.replaces = ["neveutils-extra-man<=14.0.1-r0"]
     self.install_if = [self.parent, "base-man"]
 
     return ["usr/share/man"]

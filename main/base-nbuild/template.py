@@ -4,7 +4,7 @@ pkgrel = 1
 build_style = "meta"
 pkgdesc = "Core package set for nbuild containers"
 license = "custom:meta"
-url = "https://chimera-linux.org"
+url = "https://neve-linux.fmpt.org"
 
 # musl must be built first to provide shlibs for later packages during stage 0
 depends = [
@@ -13,7 +13,7 @@ depends = [
     "clang",
     "lld",
     "ncurses",
-    "chimerautils-extra",
+    "neveutils-extra",
     "apk-tools",
     "gmake",
     "libarchive-progs",
