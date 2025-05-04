@@ -1,4 +1,4 @@
-from cbuild.core import paths
+from nbuild.core import paths
 
 import shutil
 
