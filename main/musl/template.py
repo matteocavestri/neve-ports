@@ -79,21 +79,23 @@ def post_build(self):
     self.cp(self.files_path / "getent.c", ".")
     self.cp(self.files_path / "getconf.c", ".")
     self.cp(self.files_path / "iconv.c", ".")
-    self.do(
-        self.get_tool("AR"),
-        "r",
-        "libssp_nonshared.a",
-        "__stack_chk_fail_local.o",
-    )
 
     cc = compiler.C(self)
     cc.invoke(["getent.c"], "getent")
     cc.invoke(["getconf.c"], "getconf")
     cc.invoke(["iconv.c"], "iconv")
+
     cc.invoke(
         ["__stack_chk_fail_local.c"],
         "__stack_chk_fail_local.o",
         obj_file=True,
+    )
+
+    self.do(
+        self.get_tool("AR"),
+        "r",
+        "libssp_nonshared.a",
+        "__stack_chk_fail_local.o",
     )
 
 
