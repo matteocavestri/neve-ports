@@ -82,6 +82,7 @@ def post_build(self):
     self.cp(self.files_path / "__stack_chk_fail_local.c", ".")
 
     cc = compiler.C(self)
+
     cc.invoke(["getent.c"], "getent")
     cc.invoke(["getconf.c"], "getconf")
     cc.invoke(["iconv.c"], "iconv")
@@ -91,7 +92,6 @@ def post_build(self):
         "__stack_chk_fail_local.o",
         obj_file=True,
     )
-
     self.do(
         self.get_tool("AR"),
         "r",
@@ -123,6 +123,7 @@ def post_install(self):
     self.install_bin("iconv")
     self.install_bin("getent")
     self.install_bin("getconf")
+
     self.install_file("libssp_nonshared.a", "usr/lib")
 
     self.install_man(self.files_path / "getent.1")
@@ -144,6 +145,14 @@ def _(self):
     return ["usr/lib/libc.a"]
 
 
+@subpackage("musl-libssp-static")
+def _(self):
+    self.subdesc = "libssp_nonshared for some targets"
+    self.depends = []
+
+    return ["usr/lib/libssp_nonshared.a"]
+
+
 @subpackage("musl-devel")
 def _(self):
     # empty depends so libc.so can be switched with alternatives
@@ -152,10 +161,3 @@ def _(self):
     self.options = ["!splitstatic"]
     # the .a files are empty archives
     return ["usr/include", "usr/lib/*.o", "usr/lib/*.a"]
-
-
-@subpackage("musl-libssp-static")
-def _(self):
-    self.subdesc = "libssp_nonshared for some targets"
-    self.depends = []
-    return ["usr/lib/libssp_nonshared.a"]
