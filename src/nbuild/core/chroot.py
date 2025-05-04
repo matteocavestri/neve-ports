@@ -55,7 +55,7 @@ def chroot_check(force=False, error=True):
 def set_extras(elist):
     global _extra_pkgs
 
-    _extra_pkgs = ["base-nbuild", *elist]
+    _extra_pkgs = ["base-cbuild", *elist]
 
 
 def get_world_base():
