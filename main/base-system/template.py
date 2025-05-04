@@ -1,29 +1,14 @@
-pkgname = "base-full"
+pkgname = "base-system"
 pkgver = "0.1"
 pkgrel = 1
 build_style = "meta"
 provides = [self.with_pkgver("base-core")]
-pkgdesc = "Neve base package for bare metal and virtual machines"
+pkgdesc = "Neve base system package for bare metal and virtual machines"
 license = "custom:meta"
 url = "https://neve-linux.fmpt.org"
 
 
-@subpackage("base-full-console")
-def _(self):
-    self.subdesc = "console tools"
-    self.install_if = [self.parent]
-    # transitional
-    self.provides = [self.with_pkgver("base-core-console")]
-    self.depends = [
-        "cmd:dmesg!util-linux-dmesg",
-        "console-setup",
-        "kbd",
-        "nyagetty",
-    ]
-    return []
-
-
-@subpackage("base-full-core")
+@subpackage("base-system-core")
 def _(self):
     self.subdesc = "core tools"
     self.install_if = [self.parent]
@@ -33,18 +18,33 @@ def _(self):
         "chimera-install-scripts",
         "dinit-chimera",
         "procps",
-        "turnstile",
         "musl-locales",
         "mandoc",
         "man-pages",
+        "util-linux-fdisk",
+        "util-linux-fstrim",
+        "util-linux-mkfs",
+        "e2fsprogs",
+        "f2fs-tools",
+        "xfsprogs",
+        "btrfs-progs",
+        "dosfstools",
+        "cmd:dmesg!util-linux-dmesg",
+        "console-setup",
+        "kbd",
+        "nyagetty",
     ]
+    match self.rparent.profile().arch:
+        case "ppc64":
+            # ppc mac disk tools
+            self.depends += ["hfsutils", "mac-fdisk"]
     return []
 
 
-@subpackage("base-full-firmware")
+@subpackage("base-system-firmware")
 def _(self):
     self.subdesc = "firmware"
-    self.install_if = [self.parent, "linux", "!base-full-minimal"]
+    self.install_if = [self.parent, "linux", "!base-system-minimal"]
     self.depends = [
         "firmware-linux-meta",
         "firmware-ipw2100",
@@ -56,10 +56,10 @@ def _(self):
     return []
 
 
-@subpackage("base-full-fonts")
+@subpackage("base-system-fonts")
 def _(self):
     self.subdesc = "fonts"
-    self.install_if = [self.parent, "fontconfig", "!base-full-minimal"]
+    self.install_if = [self.parent, "fontconfig", "!base-system-minimal"]
     self.depends = [
         "fonts-dejavu",
         "fonts-liberation",
@@ -70,33 +70,10 @@ def _(self):
     return []
 
 
-@subpackage("base-full-fs")
-def _(self):
-    self.subdesc = "filesystem tools"
-    self.install_if = [self.parent]
-    # transitional
-    self.provides = [self.with_pkgver("base-core-fs")]
-    self.depends = [
-        "util-linux-fdisk",
-        "util-linux-fstrim",
-        "util-linux-mkfs",
-        "e2fsprogs",
-        "f2fs-tools",
-        "xfsprogs",
-        "btrfs-progs",
-        "dosfstools",
-    ]
-    match self.rparent.profile().arch:
-        case "ppc64":
-            # ppc mac disk tools
-            self.depends += ["hfsutils", "mac-fdisk"]
-    return []
-
-
-@subpackage("base-full-kernel")
+@subpackage("base-system-kernel")
 def _(self):
     self.subdesc = "kernel tooling"
-    self.install_if = [self.parent, "linux", "!base-full-minimal"]
+    self.install_if = [self.parent, "linux", "!base-system-minimal"]
     # transitional
     self.provides = [self.with_pkgver("base-core-kernel")]
     self.depends = [
@@ -106,10 +83,10 @@ def _(self):
     return []
 
 
-@subpackage("base-full-misc")
+@subpackage("base-system-misc")
 def _(self):
     self.subdesc = "miscellaneous"
-    self.install_if = [self.parent, "!base-full-minimal"]
+    self.install_if = [self.parent, "!base-system-minimal"]
     # transitional
     self.provides = [self.with_pkgver("base-core-misc")]
     self.depends = [
@@ -129,7 +106,7 @@ def _(self):
     return []
 
 
-@subpackage("base-full-net-tools")
+@subpackage("base-system-net-tools")
 def _(self):
     self.subdesc = "network tools"
     self.install_if = [self.parent]
