@@ -728,7 +728,7 @@ def bootstrap(tgt):
         rp = None
         try:
             rp = template.Template(
-                "main/base-nbuild",
+                "main/base-cbuild",
                 None,
                 False,
                 False,
@@ -765,7 +765,7 @@ def bootstrap(tgt):
         # make sure to reset chroot_ready when the bldroot is reinited
         chroot.chroot_check(True)
         try:
-            do_pkg("pkg", "main/base-nbuild", False, False, stage=1)
+            do_pkg("pkg", "main/base-cbuild", False, False, stage=1)
         except template.SkipPackage:
             pass
         # go back to stage 1
@@ -788,7 +788,7 @@ def bootstrap(tgt):
         paths.reinit_buildroot(oldmdir, 1)
         chroot.chroot_check(True)
         try:
-            do_pkg("pkg", "main/base-nbuild", False, False, stage=2)
+            do_pkg("pkg", "main/base-cbuild", False, False, stage=2)
         except template.SkipPackage:
             pass
         # go back to stage 2
@@ -807,7 +807,7 @@ def bootstrap(tgt):
         paths.reinit_buildroot(oldmdir, 2)
         chroot.chroot_check(True)
         try:
-            do_pkg("pkg", "main/base-nbuild", False, stage=3)
+            do_pkg("pkg", "main/base-cbuild", False, stage=3)
         except template.SkipPackage:
             pass
         # go back to stage 3
