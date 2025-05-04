@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-cbpath = None
+nbpath = None
 rtpath = None
 
 # global options
@@ -45,7 +45,7 @@ opt_blddir = ""
 opt_pkgpath = "packages"
 opt_srcpath = "sources"
 opt_keypath = None
-opt_cchpath = "cbuild_cache"
+opt_cchpath = "nbuild_cache"
 opt_stagepath = "pkgstage"
 opt_statusfd = None
 opt_bulkcont = False
@@ -68,10 +68,10 @@ def init_early():
     import signal
     import os.path
 
-    global cbpath, rtpath
+    global nbpath, rtpath
 
-    cbpath = os.path.dirname(os.path.realpath(__file__))
-    rtpath = os.path.dirname(cbpath)
+    nbpath = os.path.dirname(os.path.realpath(__file__))
+    rtpath = os.path.dirname(nbpath)
 
     # start from a sane directory
     os.chdir(rtpath)
@@ -80,14 +80,14 @@ def init_early():
     os.umask(0o022)
 
     # we should always be able to import modules from here
-    sys.path.append(cbpath)
+    sys.path.append(nbpath)
     # need to be able to import templates
     sys.path.append(rtpath)
 
     def do_exit(signum, stack):
-        from cbuild.core import errors
+        from nbuild.core import errors
 
-        raise errors.CbuildException("interrupted!")
+        raise errors.NbuildException("interrupted!")
 
     # exit handler
     signal.signal(signal.SIGINT, do_exit)
@@ -358,7 +358,7 @@ def handle_options():
         opt_altrepo = bcfg.get("alt_repository", fallback=opt_altrepo)
         opt_pkgpath = bcfg.get("repository", fallback=opt_pkgpath)
         opt_srcpath = bcfg.get("sources", fallback=opt_srcpath)
-        opt_cchpath = bcfg.get("cbuild_cache_path", fallback=opt_cchpath)
+        opt_cchpath = bcfg.get("nbuild_cache_path", fallback=opt_cchpath)
         opt_allowcat = bcfg.get("categories", fallback=opt_allowcat)
         opt_maint = bcfg.get("maintainer", fallback=opt_maint)
         opt_restricted = bcfg.getboolean(
@@ -488,8 +488,8 @@ def handle_options():
 def init_late():
     import os
 
-    from cbuild.core import paths, spdx
-    from cbuild.apk import sign, util as autil
+    from nbuild.core import paths, spdx
+    from nbuild.apk import sign, util as autil
 
     mainrepo = opt_altrepo
     altrepo = opt_pkgpath
@@ -499,7 +499,7 @@ def init_late():
 
     # init paths early, modules rely on it
     paths.init(
-        cbpath,
+        nbpath,
         rtpath,
         opt_bldroot,
         opt_blddir,
@@ -511,14 +511,14 @@ def init_late():
     )
 
     # apk command
-    if "CBUILD_APK_PATH" in os.environ:
-        paths.set_apk(os.environ["CBUILD_APK_PATH"])
+    if "NBUILD_APK_PATH" in os.environ:
+        paths.set_apk(os.environ["NBUILD_APK_PATH"])
     else:
         paths.set_apk(opt_apkcmd)
 
     # bwrap command
-    if "CBUILD_BWRAP_PATH" in os.environ:
-        paths.set_bwrap(os.environ["CBUILD_BWRAP_PATH"])
+    if "NBUILD_BWRAP_PATH" in os.environ:
+        paths.set_bwrap(os.environ["NBUILD_BWRAP_PATH"])
     else:
         paths.set_bwrap(opt_bwcmd)
 
@@ -551,7 +551,7 @@ def short_traceback(e, log):
     import traceback
     import subprocess
     import shlex
-    from cbuild.core import pkg as pkgm
+    from nbuild.core import pkg as pkgm
 
     log.out("Stack trace:")
     # filter out some pointless stuff:
@@ -627,7 +627,7 @@ def pkg_error(e, log):
 
 
 def pkg_run_exc(f):
-    from cbuild.core import template, errors, logger
+    from nbuild.core import template, errors, logger
 
     log = logger.get()
     try:
@@ -636,8 +636,8 @@ def pkg_run_exc(f):
             return retv, False
     except template.SkipPackage:
         return False, False
-    except errors.CbuildException as e:
-        log.out(f"\f[red]cbuild: {e!s}")
+    except errors.NbuildException as e:
+        log.out(f"\f[red]nbuild: {e!s}")
         if e.extra:
             log.out_plain(e.extra)
         return False, True
@@ -656,14 +656,14 @@ def pkg_run_exc(f):
 
 
 def binary_bootstrap(tgt):
-    from cbuild.core import chroot, paths
+    from nbuild.core import chroot, paths
 
     paths.prepare()
     chroot.install()
 
 
 def do_unstage(tgt, force=False):
-    from cbuild.core import chroot, stage
+    from nbuild.core import chroot, stage
 
     if opt_arch and opt_arch != chroot.host_cpu():
         stage.clear(opt_arch, force)
@@ -675,7 +675,7 @@ def do_unstage(tgt, force=False):
 
 
 def check_unstage(tgt):
-    from cbuild.core import chroot, stage
+    from nbuild.core import chroot, stage
 
     if opt_arch and opt_arch != chroot.host_cpu():
         stage.check_stage(opt_arch, remote=True)
@@ -687,8 +687,8 @@ def bootstrap(tgt):
     import sys
     import shutil
 
-    from cbuild.core import build, chroot, logger, template, paths
-    from cbuild.apk import cli
+    from build.core import build, chroot, logger, template, paths
+    from nbuild.apk import cli
 
     # source bootstrap is always networkless
     cli.set_network(False)
@@ -704,7 +704,7 @@ def bootstrap(tgt):
     paths.reinit_buildroot(oldmdir, 0)
 
     if not chroot.chroot_check(True, False):
-        logger.get().out("cbuild: bootstrapping stage 0")
+        logger.get().out("nbuild: bootstrapping stage 0")
 
         # extra program checks
         for prog in [
@@ -728,7 +728,7 @@ def bootstrap(tgt):
         rp = None
         try:
             rp = template.Template(
-                "main/base-cbuild",
+                "main/base-nbuild",
                 None,
                 False,
                 False,
@@ -759,13 +759,13 @@ def bootstrap(tgt):
     paths.reinit_buildroot(oldmdir, 1)
 
     if not chroot.chroot_check(True, False):
-        logger.get().out("cbuild: bootstrapping stage 1")
+        logger.get().out("nbuild: bootstrapping stage 1")
         # use stage 0 build root to build, but build into stage 1 repo
         paths.reinit_buildroot(oldmdir, 0)
         # make sure to reset chroot_ready when the bldroot is reinited
         chroot.chroot_check(True)
         try:
-            do_pkg("pkg", "main/base-cbuild", False, False, stage=1)
+            do_pkg("pkg", "main/base-nbuild", False, False, stage=1)
         except template.SkipPackage:
             pass
         # go back to stage 1
@@ -783,12 +783,12 @@ def bootstrap(tgt):
     paths.reinit_buildroot(oldmdir, 2)
 
     if not chroot.chroot_check(True, False):
-        logger.get().out("cbuild: bootstrapping stage 2")
+        logger.get().out("nbuild: bootstrapping stage 2")
         # use stage 1 build root to build, but build into stage 2 repo
         paths.reinit_buildroot(oldmdir, 1)
         chroot.chroot_check(True)
         try:
-            do_pkg("pkg", "main/base-cbuild", False, False, stage=2)
+            do_pkg("pkg", "main/base-nbuild", False, False, stage=2)
         except template.SkipPackage:
             pass
         # go back to stage 2
@@ -802,12 +802,12 @@ def bootstrap(tgt):
     paths.reinit_buildroot(oldmdir, 3)
 
     if not chroot.chroot_check(True, False):
-        logger.get().out("cbuild: bootstrapping stage 3")
+        logger.get().out("nbuild: bootstrapping stage 3")
         # use stage 1 build root to build, but build into stage 2 repo
         paths.reinit_buildroot(oldmdir, 2)
         chroot.chroot_check(True)
         try:
-            do_pkg("pkg", "main/base-cbuild", False, stage=3)
+            do_pkg("pkg", "main/base-nbuild", False, stage=3)
         except template.SkipPackage:
             pass
         # go back to stage 3
@@ -817,8 +817,8 @@ def bootstrap(tgt):
 
 
 def bootstrap_update(tgt):
-    from cbuild.core import chroot
-    from cbuild.util import flock
+    from nbuild.core import chroot
+    from nbuild.util import flock
 
     chroot.install()
     with flock.lock(flock.rootlock()):
@@ -829,7 +829,7 @@ def bootstrap_update(tgt):
 def do_keygen(tgt):
     import os.path
 
-    from cbuild.apk import sign
+    from nbuild.apk import sign
 
     if len(cmdline.command) >= 3:
         keyn, keysize = cmdline.command[1], int(cmdline.command[2])
@@ -848,7 +848,7 @@ def do_keygen(tgt):
 def do_clean(tgt):
     import shutil
 
-    from cbuild.core import paths, chroot, template, logger
+    from nbuild.core import paths, chroot, template, logger
 
     ctmpl = cmdline.command[1] if len(cmdline.command) >= 2 else None
     if ctmpl:
@@ -884,25 +884,25 @@ def do_clean(tgt):
 def do_zap(tgt):
     import shutil
 
-    from cbuild.core import paths, errors
+    from nbuild.core import paths, errors
 
     if paths.bldroot().is_dir():
         shutil.rmtree(paths.bldroot())
     elif paths.bldroot().exists():
-        raise errors.CbuildException("broken build container")
+        raise errors.NbuildException("broken build container")
 
 
 def do_remove_autodeps(tgt):
-    from cbuild.core import chroot
+    from nbuild.core import chroot
 
     chroot.cleanup_world(None)
 
 
 def do_prune_obsolete(tgt):
-    from cbuild.core import logger, paths
-    from cbuild.apk import cli
+    from nbuild.core import logger, paths
+    from nbuild.apk import cli
 
-    logger.get().out("cbuild: pruning repositories...")
+    logger.get().out("nbuild: pruning repositories...")
 
     reposd = paths.repository()
     reposet = {}
@@ -921,8 +921,8 @@ def do_prune_obsolete(tgt):
 def do_prune_removed(tgt):
     import time
 
-    from cbuild.core import chroot, logger, paths, template, errors
-    from cbuild.apk import cli
+    from nbuild.core import chroot, logger, paths, template, errors
+    from nbuild.apk import cli
 
     # FIXME: compute from git if possible
     epoch = int(time.time())
@@ -940,7 +940,7 @@ def do_prune_removed(tgt):
             # this could be a sub-repo
             repon = repo.parent.name
         if not (paths.distdir() / repon).is_dir():
-            raise errors.CbuildException(
+            raise errors.NbuildException(
                 f"repository '{repo}' does not match templates"
             )
         tmplp = paths.distdir() / repon
@@ -1023,8 +1023,8 @@ def do_index(tgt):
     import time
     import pathlib
 
-    from cbuild.core import chroot, logger, paths, errors
-    from cbuild.apk import cli
+    from nbuild.core import chroot, logger, paths, errors
+    from nbuild.apk import cli
 
     idir = cmdline.command[1] if len(cmdline.command) >= 2 else None
     # FIXME: compute from git if possible
@@ -1043,7 +1043,7 @@ def do_index(tgt):
     if idir:
         repo = pathlib.Path(idir)
         if not (repo / archn).is_dir():
-            raise errors.CbuildException(f"repository '{repo}' does not exist")
+            raise errors.NbuildException(f"repository '{repo}' does not exist")
         _index(repo)
         return
     # all repos
@@ -1066,7 +1066,7 @@ def do_index(tgt):
 
 
 def do_lint(tgt):
-    from cbuild.core import chroot, template
+    from nbuild.core import chroot, template
 
     pkgn = cmdline.command[1] if len(cmdline.command) >= 2 else None
     # just read it and do nothing else
@@ -1085,7 +1085,7 @@ def do_lint(tgt):
 
 
 def _collect_tmpls(pkgn, catn=None):
-    from cbuild.core import paths
+    from nbuild.core import paths
 
     tmpls = []
 
@@ -1136,7 +1136,7 @@ def _add_deps_graph(pn, tp, pvisit, cbvisit, rpkg, depg):
 def _graph_prepare():
     import graphlib
 
-    from cbuild.core import chroot, template, errors
+    from nbuild.core import chroot, template, errors
 
     pkgn = cmdline.command[1] if len(cmdline.command) >= 2 else None
 
@@ -1178,7 +1178,7 @@ def _graph_prepare():
 
 
 def do_prune_sources(tgt):
-    from cbuild.core import chroot, logger, template, errors, paths
+    from nbuild.core import chroot, logger, template, errors, paths
     import shutil
     import re
 
@@ -1243,7 +1243,7 @@ def do_prune_sources(tgt):
     logger.get().out("Pruning sources...")
     # first prune versions that are gone
     for f in paths.sources().iterdir():
-        if f.name == "by_sha256" or f.name == "cbuild.lock":
+        if f.name == "by_sha256" or f.name == "nbuild.lock":
             continue
         # stuff that does not correspond to any template version
         if f.name not in exist:
@@ -1267,7 +1267,7 @@ def do_prune_sources(tgt):
 
 
 def do_relink_subpkgs(tgt):
-    from cbuild.core import chroot, paths, logger, errors, template
+    from nbuild.core import chroot, paths, logger, errors, template
     import shutil
 
     ddir = paths.distdir()
@@ -1361,23 +1361,23 @@ def do_relink_subpkgs(tgt):
 def do_cycle_check(tgt):
     import graphlib
 
-    from cbuild.core import errors
+    from nbuild.core import errors
 
     tg = _graph_prepare()
 
     try:
         tg.prepare()
     except graphlib.CycleError as ce:
-        raise errors.CbuildException(
+        raise errors.NbuildException(
             "cycle encountered: " + " <= ".join(ce.args[1])
         )
 
 
 def do_print_build_graph(tgt):
-    from cbuild.core import chroot, template, errors
+    from nbuild.core import chroot, template, errors
 
     if len(cmdline.command) < 2:
-        raise errors.CbuildException("print-build-graph needs a package name")
+        raise errors.NbuildException("print-build-graph needs a package name")
 
     rtmpls = {}
 
@@ -1419,8 +1419,8 @@ def do_print_build_graph(tgt):
 
 
 def _get_unbuilt(outdated=False):
-    from cbuild.core import chroot, template, paths
-    from cbuild.apk import util
+    from nbuild.core import chroot, template, paths
+    from nbuild.apk import util
     import subprocess
 
     cats = opt_allowcat.strip().split()
@@ -1591,7 +1591,7 @@ def _get_unbuilt(outdated=False):
 
 
 def do_update_check(tgt):
-    from cbuild.core import update_check, template, chroot
+    from nbuild.core import update_check, template, chroot
 
     namelen = 0
     verlen = 0
@@ -1665,7 +1665,7 @@ def do_update_check(tgt):
 
 
 def do_dump(tgt):
-    from cbuild.core import chroot, template, errors
+    from nbuild.core import chroot, template, errors
 
     import json
 
@@ -1699,7 +1699,7 @@ def do_dump(tgt):
 
 
 def do_print_mismatched(tgt):
-    from cbuild.core import chroot, template, errors
+    from nbuild.core import chroot, template, errors
 
     tmpls = _collect_tmpls(None)
 
@@ -1729,8 +1729,8 @@ def do_print_mismatched(tgt):
 
 
 def do_pkg(tgt, pkgn=None, force=None, check=None, stage=None):
-    from cbuild.core import build, chroot, template, errors, paths
-    from cbuild.util import compiler
+    from nbuild.core import build, chroot, template, errors, paths
+    from nbuild.util import compiler
 
     if force is None:
         force = opt_force
@@ -1742,16 +1742,16 @@ def do_pkg(tgt, pkgn=None, force=None, check=None, stage=None):
         bstage = stage
     if tgt == "invoke-custom":
         if len(cmdline.command) != 3:
-            raise errors.CbuildException(f"{tgt} needs two arguments")
+            raise errors.NbuildException(f"{tgt} needs two arguments")
         tgt = "custom:" + cmdline.command[1]
         pkgn = cmdline.command[2]
     elif tgt == "pkg" and len(cmdline.command) > 2:
         return do_bulkpkg(tgt)
     elif not pkgn:
         if len(cmdline.command) <= 1 and tgt != "chroot":
-            raise errors.CbuildException(f"{tgt} needs a package name")
+            raise errors.NbuildException(f"{tgt} needs a package name")
         elif len(cmdline.command) > 2:
-            raise errors.CbuildException(f"{tgt} needs only one package")
+            raise errors.NbuildException(f"{tgt} needs only one package")
         if len(cmdline.command) > 1:
             pkgn = cmdline.command[1]
     rp = (
@@ -1798,11 +1798,11 @@ def do_pkg(tgt, pkgn=None, force=None, check=None, stage=None):
             fakeroot=True,
             new_session=False,
             mount_binpkgs=True,
-            mount_cbuild_cache=True,
+            mount_nbuild_cache=True,
             ro_dest=False,
             env={
                 "HOME": "/tmp",
-                "CBUILD_SHELL": "1",
+                "NBUILD_SHELL": "1",
                 "PS1": "\\u@\\h: \\w$ ",
                 "SHELL": "/bin/sh",
             },
@@ -1831,7 +1831,7 @@ def do_pkg(tgt, pkgn=None, force=None, check=None, stage=None):
 def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
     import graphlib
 
-    from cbuild.core import logger, template, chroot, errors, build
+    from nbuild.core import logger, template, chroot, errors, build
 
     # we will use this for correct dependency ordering
     depg = graphlib.TopologicalSorter()
@@ -1868,13 +1868,13 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
             if pns is None:
                 badpkgs.add(pn)
                 statusf.write(f"{pn} missing\n")
-                log.out(f"\f[red]cbuild: missing package '{pn}'")
+                log.out(f"\f[red]nbuild: missing package '{pn}'")
                 failed = True
                 continue
             else:
                 badpkgs.add(pn)
                 statusf.write(f"{pn} invalid\n")
-                log.out(f"\f[red]cbuild: invalid package '{pn}'")
+                log.out(f"\f[red]nbuild: invalid package '{pn}'")
                 failed = True
                 continue
         # now replace with sanitized name
@@ -1885,22 +1885,22 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
         # skip if previously failed
         if failed and not opt_bulkcont:
             statusf.write(f"{npn} skipped\n")
-            log.out(f"\f[red]cbuild: skipping template '{npn}'")
+            log.out(f"\f[red]nbuild: skipping template '{npn}'")
             continue
         # finally add to set
         rpkgs.add(npn)
 
     # visited "intermediate" templates, includes stuff that is "to be done"
-    # which will be force-added after base-cbuild is handled, as we don't
-    # want this to influence the graph of base-cbuild
+    # which will be force-added after base-nbuild is handled, as we don't
+    # want this to influence the graph of base-nbuild
     #
     # ignore minor errors in templates like lint as those do not concern us
     # allow broken because that does not concern us yet either (handled later)
     # do not ignore missing tmpls because that is likely error in main tmpl
     pvisit = set()
 
-    # this is visited stuff in base-cbuild, we do checks against it later
-    # to figure out if to add the implicit base-cbuild "dep" in the topology
+    # this is visited stuff in base-nbuild, we do checks against it later
+    # to figure out if to add the implicit base-nbuild "dep" in the topology
     # as without checks we'd be creating random cycles
     cbvisit = set()
 
@@ -1908,9 +1908,9 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
         # in raw mode we don't care about ordering, taking it as is
         if do_raw:
             return True
-        # add base-cbuild "dependency" for correct implicit sorting
-        if not cbinit and pn not in cbvisit and pn != "main/base-cbuild":
-            depg.add(pn, "main/base-cbuild")
+        # add base-nbuild "dependency" for correct implicit sorting
+        if not cbinit and pn not in cbvisit and pn != "main/base-nbuild":
+            depg.add(pn, "main/base-nbuild")
         # now add the rest of the stuff
         return _add_deps_graph(
             pn,
@@ -1932,12 +1932,12 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
             depg,
         )
 
-    # first add base-cbuild, since that's an "implicit" dependency
+    # first add base-nbuild, since that's an "implicit" dependency
     # of whatever we add in the transaction (other than cycles)
     handle_recdeps(
-        "main/base-cbuild",
+        "main/base-nbuild",
         template.Template(
-            "main/base-cbuild",
+            "main/base-nbuild",
             tarch,
             True,
             False,
@@ -1962,7 +1962,7 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
         # skip if previously failed and set that way
         if failed and not opt_bulkcont:
             statusf.write(f"{pn} skipped\n")
-            log.out(f"\f[red]cbuild: skipping template '{pn}'")
+            log.out(f"\f[red]nbuild: skipping template '{pn}'")
             continue
         # parse, handle any exceptions so that we can march on
         ofailed = failed
@@ -2051,7 +2051,7 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
                 if failed and not opt_bulkcont:
                     statusf.write(f"{pn} skipped\n")
                     if do_build:
-                        log.out(f"\f[red]cbuild: skipping template '{pn}'")
+                        log.out(f"\f[red]nbuild: skipping template '{pn}'")
                     continue
                 # ensure to write the status
                 if _do_with_exc(
@@ -2072,13 +2072,13 @@ def _bulkpkg(pkgs, statusf, do_build, do_raw, version):
                     statusf.write(f"{pn} failed\n")
 
     if failed:
-        raise errors.CbuildException("at least one bulk package failed")
+        raise errors.NbuildException("at least one bulk package failed")
     elif not opt_stage and do_build:
         do_unstage("pkg", False)
 
 
 def _collect_git(expr):
-    from cbuild.core import errors
+    from nbuild.core import errors
     import subprocess
     import pathlib
 
@@ -2115,7 +2115,7 @@ def _collect_git(expr):
     # locate the commit list
     subp = subprocess.run(cmd, capture_output=True)
     if subp.returncode != 0:
-        raise errors.CbuildException(f"failed to resolve commits for '{oexpr}'")
+        raise errors.NbuildException(f"failed to resolve commits for '{oexpr}'")
     # collect changed templates
     tmpls = set()
     for commit in subp.stdout.strip().split():
@@ -2124,7 +2124,7 @@ def _collect_git(expr):
             capture_output=True,
         )
         if subp.returncode != 0:
-            raise errors.CbuildException(
+            raise errors.NbuildException(
                 f"failed to resolve files for '{commit.decode()}'"
             )
         for fname in subp.stdout.strip().split(b"\n"):
@@ -2161,7 +2161,7 @@ def _collect_status(inf):
 def _collect_blist(pkgs):
     import sys
     import shutil
-    from cbuild.core import errors
+    from nbuild.core import errors
 
     rpkgs = []
     for pkg in pkgs:
@@ -2171,7 +2171,7 @@ def _collect_blist(pkgs):
         # git expressions
         if pkg.startswith("git:"):
             if not shutil.which("git"):
-                raise errors.CbuildException("git is needed for git bulk")
+                raise errors.NbuildException("git is needed for git bulk")
             rpkgs += _collect_git(pkg.removeprefix("git:"))
             continue
         # status files
@@ -2212,11 +2212,11 @@ def _collect_blist(pkgs):
 
 def do_bulkpkg(tgt, do_build=True, do_raw=False, version=False):
     import os
-    from cbuild.core import errors
+    from nbuild.core import errors
 
     if do_raw:
         if len(cmdline.command) <= 1:
-            raise errors.CbuildException("need at least one template")
+            raise errors.NbuildException("need at least one template")
         pkgs = cmdline.command[1:]
     elif len(cmdline.command) <= 1:
         pkgs = _collect_tmpls(None)
@@ -2227,7 +2227,7 @@ def do_bulkpkg(tgt, do_build=True, do_raw=False, version=False):
         try:
             sout = os.fdopen(opt_statusfd, "w", 1)
         except OSError:
-            raise errors.CbuildException(
+            raise errors.NbuildException(
                 f"bad status file descriptor ({opt_statusfd})"
             )
     else:
@@ -2242,11 +2242,11 @@ def do_bulkpkg(tgt, do_build=True, do_raw=False, version=False):
 
 
 def do_prepare_upgrade(tgt):
-    from cbuild.core import template, chroot, build, errors
+    from nbuild.core import template, chroot, build, errors
     import pathlib
 
     if len(cmdline.command) < 2:
-        raise errors.CbuildException("prepare-upgrade needs a package name")
+        raise errors.NbuildException("prepare-upgrade needs a package name")
 
     pkgn = cmdline.command[1]
 
@@ -2316,18 +2316,18 @@ def do_prepare_upgrade(tgt):
 
 
 def do_bump_pkgver(tgt):
-    from cbuild.core import chroot, logger, template, errors
-    from cbuild.apk import cli as acli
+    from nbuild.core import chroot, logger, template, errors
+    from nbuild.apk import cli as acli
     import pathlib
 
     if len(cmdline.command) != 3:
-        raise errors.CbuildException("bump-pkgver needs a name and a version")
+        raise errors.NbuildException("bump-pkgver needs a name and a version")
 
     pkgn = cmdline.command[1]
     pkgv = cmdline.command[2]
 
     if not acli.check_version(pkgv):
-        raise errors.CbuildException(f"version '{pkgv}' is invalid")
+        raise errors.NbuildException(f"version '{pkgv}' is invalid")
 
     try:
         tmpl = template.Template(
@@ -2362,11 +2362,11 @@ def do_bump_pkgver(tgt):
 
 
 def do_bump_pkgrel(tgt):
-    from cbuild.core import chroot, logger, template, errors
+    from nbuild.core import chroot, logger, template, errors
     import pathlib
 
     if len(cmdline.command) < 2:
-        raise errors.CbuildException("bump-pkgrel needs at least one name")
+        raise errors.NbuildException("bump-pkgrel needs at least one name")
 
     for pkgn in cmdline.command[1:]:
         try:
@@ -2460,7 +2460,7 @@ class InteractiveCompleter:
 
 
 def do_commit(tgt):
-    from cbuild.core import errors, chroot, paths, template
+    from nbuild.core import errors, chroot, paths, template
     import subprocess
     import tempfile
 
@@ -2477,7 +2477,7 @@ def do_commit(tgt):
     # collect files known to git...
     subp = subprocess.run(["git", "status", "--porcelain"], capture_output=True)
     if subp.returncode != 0:
-        raise errors.CbuildException("failed to resolve git changes")
+        raise errors.NbuildException("failed to resolve git changes")
 
     # track changes in a set so we know what we can pass to commit
     changes = set()
@@ -2488,7 +2488,7 @@ def do_commit(tgt):
         changes.add(ln[1].decode())
 
     if len(tmpls) < 1:
-        raise errors.CbuildException("commit needs at least one template")
+        raise errors.NbuildException("commit needs at least one template")
 
     hcpu = chroot.host_cpu()
 
@@ -2600,7 +2600,7 @@ def do_interactive(tgt):
     import shlex
     import readline
 
-    from cbuild.core import logger
+    from nbuild.core import logger
 
     global cmdline
 
@@ -2636,11 +2636,11 @@ def do_interactive(tgt):
         readline.parse_and_bind("python:bind ^I rl_complete")
 
     while True:
-        pmpt = shlex.split(input("cbuild> "))
+        pmpt = shlex.split(input("nbuild> "))
         try:
             cmdline = parser.parse_intermixed_args(pmpt)
         except SystemExit:
-            logger.get().out("\f[red]cbuild: invalid command line")
+            logger.get().out("\f[red]nbuild: invalid command line")
             continue
         fire_cmd()
 
@@ -2745,7 +2745,7 @@ def fire_cmd():
     import shutil
     import sys
 
-    from cbuild.core import logger, paths
+    from nbuild.core import logger, paths
 
     retcode = None
 
@@ -2769,7 +2769,7 @@ def fire_cmd():
         if cmd in command_handlers:
             retcode = command_handlers[cmd][0](cmd)
         else:
-            logger.get().out(f"\f[red]cbuild: invalid target {cmd}")
+            logger.get().out(f"\f[red]nbuild: invalid target {cmd}")
             sys.exit(1)
         return None
 
@@ -2785,10 +2785,10 @@ def fire():
     import sys
     import subprocess
 
-    from cbuild.core import build, chroot, logger, template, profile
-    from cbuild.core import paths
-    from cbuild.apk import cli
-    from cbuild.util import flock
+    from nbuild.core import build, chroot, logger, template, profile
+    from nbuild.core import paths
+    from nbuild.apk import cli
+    from nbuild.util import flock
 
     logger.init(not opt_nocolor, opt_timing)
     flock.set_nolock(opt_nolock)
@@ -2810,7 +2810,7 @@ def fire():
 
     # ensure we've got a signing key
     if not opt_signkey and cmdline.command[0] != "keygen":
-        logger.get().out("\f[red]cbuild: no signing key set")
+        logger.get().out("\f[red]nbuild: no signing key set")
         sys.exit(1)
 
     # initialize profiles
@@ -2822,7 +2822,7 @@ def fire():
             profile.get_profile(opt_arch)
         except Exception:
             logger.get().out(
-                f"\f[red]cbuild: unknown target architecture '{opt_arch}'"
+                f"\f[red]nbuild: unknown target architecture '{opt_arch}'"
             )
             sys.exit(1)
     # let apk know if we're using network
@@ -2832,19 +2832,19 @@ def fire():
         aret = subprocess.run([paths.apk(), "--version"], capture_output=True)
     except FileNotFoundError:
         logger.get().out(
-            f"\f[red]cbuild: apk not found (expected path: {paths.apk()})"
+            f"\f[red]nbuild: apk not found (expected path: {paths.apk()})"
         )
         sys.exit(1)
 
     if not aret.stdout.startswith(b"apk-tools 3"):
-        logger.get().out("\f[red]cbuild: apk-tools 3.x is required")
+        logger.get().out("\f[red]nbuild: apk-tools 3.x is required")
         sys.exit(1)
 
     try:
         subprocess.run([paths.bwrap(), "--version"], capture_output=True)
     except FileNotFoundError:
         logger.get().out(
-            f"\f[red]cbuild: bwrap not found (expected path: {paths.bwrap()})"
+            f"\f[red]nbuild: bwrap not found (expected path: {paths.bwrap()})"
         )
         sys.exit(1)
 
