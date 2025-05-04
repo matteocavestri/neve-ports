@@ -62,7 +62,7 @@ def post_configure(self):
     if self.stage == 0:
         return
 
-    from cbuild.util import meson
+    from nbuild.util import meson
 
     meson.configure(
         self,
