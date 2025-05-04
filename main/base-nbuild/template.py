@@ -18,11 +18,11 @@ depends = [
     "gmake",
     "libarchive-progs",
     "fakeroot-core",
-    self.with_pkgver("base-cbuild-progs"),
+    self.with_pkgver("base-nbuild-progs"),
 ]
 # bootstrap-llvm is temporary until next llvm release, don't feel like rebuild
 provides = [
-    "bootstrap:cbuild=9999-r0",
+    "bootstrap:nbuild=9999-r0",
     "bootstrap:llvm=9999-r0",
 ]
 replaces = ["apk-tools"]
@@ -44,29 +44,29 @@ if self.stage > 2:
 
 
 def build(self):
-    from cbuild.util import compiler
+    from nbuild.util import compiler
 
-    self.cp(self.files_path / "cbuild-cross-cc.c", ".")
-    self.cp(self.files_path / "cbuild-lld-wrapper.c", ".")
+    self.cp(self.files_path / "nbuild-cross-cc.c", ".")
+    self.cp(self.files_path / "nbuild-lld-wrapper.c", ".")
 
     cc = compiler.C(self)
-    cc.invoke(["cbuild-cross-cc.c"], "cbuild-cross-cc")
-    cc.invoke(["cbuild-lld-wrapper.c"], "cbuild-lld-wrapper")
+    cc.invoke(["nbuild-cross-cc.c"], "nbuild-cross-cc")
+    cc.invoke(["nbuild-lld-wrapper.c"], "nbuild-lld-wrapper")
 
 
 def install(self):
-    self.install_bin("cbuild-cross-cc")
-    self.install_bin("cbuild-lld-wrapper")
+    self.install_bin("nbuild-cross-cc")
+    self.install_bin("nbuild-lld-wrapper")
 
     # replace regular ld and ld.lld symlinks
-    self.install_link("usr/bin/ld.lld", "cbuild-lld-wrapper")
-    self.install_link("usr/bin/ld64.lld", "cbuild-lld-wrapper")
+    self.install_link("usr/bin/ld.lld", "nbuild-lld-wrapper")
+    self.install_link("usr/bin/ld64.lld", "nbuild-lld-wrapper")
 
     # different default apk config
     self.install_file(self.files_path / "config", "usr/lib/apk")
 
 
-@subpackage("base-cbuild-progs")
+@subpackage("base-nbuild-progs")
 def _(self):
     # make sure to use our wrapper symlinks
     self.replaces = ["lld"]
