@@ -181,7 +181,7 @@ def init_configure(self):
 
 
 def configure(self):
-    from cbuild.util import cmake
+    from nbuild.util import cmake
 
     # when bootstrapping, this will check the actual profile
     with self.profile(self.profile().arch) as pf:
@@ -214,7 +214,7 @@ exec /usr/bin/ccache /usr/lib/llvm-bootstrap/bin/{f} "$@"
 
 
 def post_install(self):
-    from cbuild.util import python
+    from nbuild.util import python
 
     # it's our default toolchain
     self.install_link("usr/bin/cc", "clang")
