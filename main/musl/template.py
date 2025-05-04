@@ -81,7 +81,7 @@ def init_configure(self):
 
 
 def post_build(self):
-    from cbuild.util import compiler
+    from nbuild.util import compiler
 
     self.cp(self.files_path / "getent.c", ".")
     self.cp(self.files_path / "getconf.c", ".")

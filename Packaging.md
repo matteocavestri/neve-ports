@@ -1,6 +1,6 @@
-# The Chimera Linux packaging manual
+# The Neve Linux packaging manual
 
-This manual is supposed to provide a comprehensive reference for Chimera Linux
+This manual is supposed to provide a comprehensive reference for Neve Linux
 packaging, i.e. a comprehensive reference for the packaging format.
 
 In general, things not described in the manual are not a part of the API and
@@ -47,20 +47,21 @@ you should not rely on them or expect them to be stable.
 * [Help](#help)
 
 <a id="introduction"></a>
+
 ## Introduction
 
-This repository contains both the `cbuild` program (which is used to build
+This repository contains both the `nbuild` program (which is used to build
 packages) as well as all the packaging templates. The templates are basically
 recipes describing how a package is built.
 
-The `cbuild` program is written in Python. Likewise, the packaging templates
+The `nbuild` program is written in Python. Likewise, the packaging templates
 are also written in Python, being special scripts containing metadata as well
 as functions that define the build steps.
 
-For usage of `cbuild`, see the `README.md` file in this repository. The manual
-does not aim to provide usage instructions for `cbuild`.
+For usage of `nbuild`, see the `README.md` file in this repository. The manual
+does not aim to provide usage instructions for `nbuild`.
 
-The `cbuild` program provides infrastructure, which allows the packaging
+The `nbuild` program provides infrastructure, which allows the packaging
 templates to be simplified and often contain only a few fields, without having
 to contain any actual functions. For example:
 
@@ -83,22 +84,23 @@ The template is stored as `template.py` in one of the packaging categories,
 in a directory named the same as `pkgname`. That means for this example it
 may be `main/foo/template.py`.
 
-The `cbuild` program can read templates and build packages according to the
+The `nbuild` program can read templates and build packages according to the
 metadata and functions stored. This happens in a special container environment
 which is controlled and highly restricted.
 
-You can invoke `cbuild` to build the software like this:
+You can invoke `nbuild` to build the software like this:
 
 ```
-$ ./cbuild pkg main/foo
+./nbuild pkg main/foo
 ```
 
 The result will be a local repository containing the binary packages.
 
 <a id="categories"></a>
+
 ## Categories
 
-The Chimera packaging collection provides two categories in which templates
+The Neve packaging collection provides two categories in which templates
 can go. These currently are:
 
 * `main`
@@ -125,9 +127,10 @@ for a longer time may submit theirs in `main`. Random leaf packages that
 contain shell scripts, themes, fonts, and so on should usually go in `user`.
 
 <a id="targets"></a>
+
 ## Targets
 
-Chimera comes with multiple target architectures, and they may be divided
+Neve comes with multiple target architectures, and they may be divided
 into roughly three categories:
 
 1) Well supported architectures with repos
@@ -167,6 +170,7 @@ Other possible targets:
 * `armv7` (ARMv7 + VFP)
 
 <a id="quality_requirements"></a>
+
 ## Quality Requirements
 
 In order to be included in `user`, there are few requirements. The software has
@@ -184,11 +188,12 @@ be avoided if viable. Drive-by contributions will not be accepted in `main`
 directly in most cases. It must not be vetoed by anybody from core team.
 
 <a id="correct_style"></a>
+
 ### Correct Style
 
-The `cbuild` system as well as the templates are formatted with the
+The `nbuild` system as well as the templates are formatted with the
 [Black](https://black.readthedocs.io/en/stable/) Python style. When writing
-either template or `cbuild` code, make sure to run it through an automated
+either template or `nbuild` code, make sure to run it through an automated
 formatter too. Both `black` and `ruff format` are supported.
 
 They should also pass [ruff check](https://astral.sh/ruff) and
@@ -197,12 +202,13 @@ running the former is preferred, as ruff contains more checks than flake8 and is
 what gets ran in CI.
 
 <a id="correct_templates"></a>
+
 ### Writing Correct Templates
 
-Most importantly, keep it simple. The `cbuild` system is designed to make
+Most importantly, keep it simple. The `nbuild` system is designed to make
 correct things easy and terse, and bad things ugly and complicated. If there
 is any doubt (i.e. something you consider good but it is inconvenient to
-write in `cbuild` templates) feel free to report it in the issue tracker.
+write in `nbuild` templates) feel free to report it in the issue tracker.
 
 Keep conditional stuff to a minimum. This includes:
 
@@ -237,27 +243,27 @@ they are guaranteed to run every time.
 Care should be taken to avoid build-time dependency cycles. Cases where
 building a package requires another package to be already built are always
 wrong. Every package should be buildable with just a `bldroot` and an
-entirely empty repository (i.e. `cbuild` should be able to build the
+entirely empty repository (i.e. `nbuild` should be able to build the
 entire dependency tree at will). Sometimes this requires disabling tests
 in the template (via `!check`). It is a good idea that even test suites
 that cannot be run or are somehow broken and disabled by default are still
 set up. That ensures someone can either find a solution later, fix it, or
 at least be able to see which parts of the suite run successfully by forcing
-the test run (as `cbuild` has an option to bypass `!check`).
+the test run (as `nbuild` has an option to bypass `!check`).
 
 The build environment takes care to minimize differences between possible
 hosts the builds may be run in. However, there may always be edge cases,
 and tests should not rely on edge cases - they must be reproducible across
-all environments `cbuild` may be run in.
+all environments `nbuild` may be run in.
 
-Also, Chimera systems should be stateless at their baseline. That means a
+Also, Neve systems should be stateless at their baseline. That means a
 system can be recreated from its world file, and all mutable configuration
 files are considered ephemeral. In practice this means:
 
 1) Anything installed in `/usr` is considered immutable; the package manager
    should own all files and directories in there. This is generally already
    the case. If a directory needs to be empty and present in there, you should
-   use the `file_modes` metadata to create them as `cbuild` will otherwise
+   use the `file_modes` metadata to create them as `nbuild` will otherwise
    clean them.
 2) Anything in `/etc` and `/var` is mutable and if the software in question
    allows, should not be owned by the package manager. Any directories and
@@ -269,6 +275,7 @@ files are considered ephemeral. In practice this means:
    scratch upon next boot.
 
 <a id="template_hardening"></a>
+
 #### Hardening Templates
 
 When writing new templates, care should be taken to use proper hardening
@@ -288,7 +295,7 @@ can benefit from it. Packages that are broken with it can also be patched
 (and patches upstreamed) in the ideal case.
 
 CFI actually consists of multiple components, which can normally be used
-individually when passing options to Clang, but cbuild groups them together.
+individually when passing options to Clang, but nbuild groups them together.
 
 CFI requires everything to be compiled with hidden visibility as well as
 with LTO. Many libraries cannot be compiled with hidden visibility, as they
@@ -390,12 +397,12 @@ there are too many instances of the bug and it is not possible to patch
 around it, it may be disabled with `!int` and a comment explaining why
 this is done.
 
-UBSan is available on all targets Chimera currently supports.
+UBSan is available on all targets Neve currently supports.
 
 ##### Identifying hardening traps
 
 Sometimes it is possible to reproduce a crash with a production package in
-Chimera. If you can recompile your program with sanitizer instrumentation,
+Neve. If you can recompile your program with sanitizer instrumentation,
 it's usually very easy to tell what's going on. However, sometimes this may
 not be possible.
 
@@ -424,7 +431,7 @@ on the `x86_64` architecture):
 Note the `ud1l` instruction, specifically the `0xc(%eax)`. The `0xc` encodes
 the identifier of the sanitizer check. The full list is available here:
 
-https://github.com/llvm/llvm-project/blob/main/clang/lib/CodeGen/CodeGenFunction.h#L112
+<https://github.com/llvm/llvm-project/blob/main/clang/lib/CodeGen/CodeGenFunction.h#L112>
 
 At the time of writing, these were:
 
@@ -463,6 +470,7 @@ context of the source code of the project in question, and often the reason
 will be clear.
 
 <a id="phases"></a>
+
 ## Build Phases
 
 Building a package consists of several phases. All phases other after `setup`
@@ -543,7 +551,7 @@ is created automatically.
 
 * `check` The software's test suite is run, if defined. By default tests
   are run (except when impossible, like in cross builds). It is possible
-  to turn off tests with a flag to `cbuild`, and templates may disable
+  to turn off tests with a flag to `nbuild`, and templates may disable
   running tests.
 
 * `install` Install the files into `destdir`. If the template defines
@@ -560,11 +568,12 @@ is created automatically.
 
 * `clean` Clean up the `builddir` and `destdir`.
 
-When building packages with `cbuild`, you can invoke only the specific
+When building packages with `nbuild`, you can invoke only the specific
 phase (from `fetch` to `pkg`). All phases leading up to the specified
 phase are run first, unless already ran.
 
 <a id="naming"></a>
+
 ## Package Naming
 
 All packages should only use lowercase characters that are in the ASCII,
@@ -634,6 +643,7 @@ language bindings (where they bring a dependency that would otherwise not
 be necessary) and so on.
 
 <a id="filesystem_structure"></a>
+
 ## Filesystem Structure
 
 Programs meant to be executed directly by the user always go in `/usr/bin`.
@@ -664,23 +674,25 @@ simplified filesystem layout (the `usr` directory with the usual files
 and symlinks, and the `bin`, `lib` etc symlinks at top level).
 
 <a id="bootstrap_packages"></a>
+
 ### Bootstrap Packages
 
 Packages with the suffix `-bootstrap` are special, provided they are not
 metapackages (`build_style = meta`). They will not be installable by default
 in a regular system and represent either bootstrap builds of various software
-needed to break dependency cycles in `cbuild` or bootstrap toolchains for
+needed to break dependency cycles in `nbuild` or bootstrap toolchains for
 various programming language compilers.
 
-Every package `foo-bootstrap` gains an implicit dependency on `bootstrap:cbuild`.
+Every package `foo-bootstrap` gains an implicit dependency on `bootstrap:nbuild`.
 
-You can set up a virtual `bootstrap:cbuild` in your own environment:
+You can set up a virtual `bootstrap:nbuild` in your own environment:
 
 ```
-$ apk add --virtual bootstrap:cbuild
+apk add --virtual bootstrap:nbuild
 ```
 
 <a id="template_structure"></a>
+
 ## Template Structure
 
 A template consists of **variables** and **functions**. A simple template
@@ -691,7 +703,7 @@ The template follows the standard Python syntax. Variables are assigned
 like `foo = value`. Functions are defined like `def function(): ...`.
 
 All template-global variables and functions that do not start with an
-underscore must be recognized by `cbuild`, i.e. variables must be one
+underscore must be recognized by `nbuild`, i.e. variables must be one
 of the below, and functions must be one of the known hooks that are
 permitted in templates. If you need to create e.g. custom helper functions
 that are specific to the template or variables that are used in expansion
@@ -699,6 +711,7 @@ of other variables, begin them with a single underscore. This makes the
 linter skip them.
 
 <a id="template_variables"></a>
+
 ### Template Variables
 
 In general, changes made to toplevel variables from inside functions are
@@ -733,7 +746,7 @@ These variables are mandatory:
 * `pkgdesc` *(str)* A short, one line description of the package. Should
   be kept at 72 characters or shorter. In general, this should not begin
   with an article, and should not end with a period, and should not contain
-  any subdescription ` (foo)` as that should be done with `subdesc`. The
+  any subdescription `(foo)` as that should be done with `subdesc`. The
   description is inherited into any subpackages, while `subdesc` may be
   filled in separately. It should use American English. See the section
   about subpackages for more details.
@@ -980,7 +993,7 @@ Keep in mind that default values may be overridden by build styles.
   conflicting files. This is primarily useful for moving files from one
   package to another, or together with `replaces_priority`, for "policy
   packages".
-* `restricted` *(str)* By default, `cbuild` does not allow packages that
+* `restricted` *(str)* By default, `nbuild` does not allow packages that
   are marked this way to be built. The value is the reason why it's marked
   like that. Often this will be e.g. non-redistributable clause in the
   terms of the package.
@@ -1009,7 +1022,7 @@ Keep in mind that default values may be overridden by build styles.
   a path that is not the default will be extracted separately and then moved
   into place.
 * `subdesc` *(str)* The package sub-description which will be appended to
-  the main description as ` (subdesc)`.
+  the main description as `(subdesc)`.
 * `tools` *(dict)* This can be used to override default tools. Refer to the
   section about tools for more information.
 * `tool_flags` *(dict)* This can be used to override things such as `CFLAGS`
@@ -1025,6 +1038,7 @@ are used by specific build styles. They are listed and described in each
 build style's section.
 
 <a id="template_functions"></a>
+
 ### Template Functions
 
 The other thing template files can specify is functions. Functions define
@@ -1085,7 +1099,7 @@ The phases for which all this applies are `fetch`, `extract`, `prepare`,
 `patch`, `configure`, `build`, `check` and `install`. They are invoked
 in this order.
 
-Every other function defined in template scope is not used by `cbuild`.
+Every other function defined in template scope is not used by `nbuild`.
 However, all regular names are reserved for future expansion. If you want
 to define custom functions (e.g. helpers) in template scope, prefix their
 names with an underscore.
@@ -1094,6 +1108,7 @@ Also keep in mind that the order of execution also interacts with hooks.
 See the section on hooks for more information.
 
 <a id="arch_patterns"></a>
+
 ### Architecture Patterns
 
 A template can specify which architectures it can build for. The `archs`
@@ -1131,6 +1146,7 @@ If the finally picked pattern is negating or if no matching pattern was
 found in the list, the template is considered not buildable.
 
 <a id="build_styles"></a>
+
 ### Build Styles
 
 Build styles are a way to simplify the template by inserting pre-defined
@@ -1144,7 +1160,7 @@ With this, you declare that this template uses the Meson build
 system. What actually happens is that the build style will create some
 of the necessary functions (`build` etc) implicitly.
 
-A build style is a Python file in `cbuild/build_style` and looks like
+A build style is a Python file in `nbuild/build_style` and looks like
 this:
 
 ```
@@ -1172,7 +1188,7 @@ while the build style can set any functions it wants. It can also define
 new template variables, as well as override default values for any
 template variable.
 
-In general, build styles are small wrappers over the `cbuild.util`
+In general, build styles are small wrappers over the `nbuild.util`
 namespace APIs. That allows you to use the APIs when you need logic that
 cannot be declared with just a simple variable, and keep templates simple
 where that is sufficient.
@@ -1258,7 +1274,7 @@ invocations do not receive them.
 
 A simple style that runs `self.configure_script` within `self.chroot_cwd`
 with `self.configure_args` for `configure` and uses a simple `Make` from
-`cbuild.util` to build.
+`nbuild.util` to build.
 
 Sets `configure`, `build`, `check`, `install`.
 
@@ -1267,12 +1283,12 @@ best when you need a simple, unassuming wrapper for projects using custom
 configure scripts. For `autotools` and `autotools`-compatible systems, use
 `gnu_configure`.
 
-Additionally creates `self.make`, which is an instance of `cbuild.util.make.Make`
+Additionally creates `self.make`, which is an instance of `nbuild.util.make.Make`
 for the template, with no other changes.
 
 #### gnu_configure
 
-A more comprehensive `build_style`, written around `cbuild.util.gnu_configure`.
+A more comprehensive `build_style`, written around `nbuild.util.gnu_configure`.
 
 Default values:
 
@@ -1284,7 +1300,7 @@ Sets `configure`, `build`, `check`, `install`.
 During `configure`, `gnu_configure.replace_guess` is called first, followed
 by `gnu_configure.configure`. The `configure` script is run inside `self.make_dir`.
 
-Additionally creates `self.make`, which is an instance of `cbuild.util.make.Make`
+Additionally creates `self.make`, which is an instance of `nbuild.util.make.Make`
 for the template, with `build` `wrksrc`, and `env` retrieved using the
 `gnu_configure.get_make_env` API.
 
@@ -1316,7 +1332,7 @@ around the `golang` utility module API.
 
 By default, environment will be updated for all invocations to set up
 the Go environment variables for the current target. These include
-`GOMODCACHE` (to save files in the cbuild cache), `GOARCH` (and maybe
+`GOMODCACHE` (to save files in the nbuild cache), `GOARCH` (and maybe
 `GOARM`) and `CGO_CFLAGS`, `CGO_CXXFLAGS`, and `CGO_LDFLAGS`.
 
 The `prepare` step is run with network access and caches the module swith
@@ -1336,7 +1352,7 @@ command is used.
 
 #### makefile
 
-A wrapper around `cbuild.util.make`.
+A wrapper around `nbuild.util.make`.
 
 Variables:
 
@@ -1352,7 +1368,7 @@ Sets `configure`, `build`, `check`, `install`.
 
 The `install` target is always called with `STRIP=true` and `PREFIX=/usr`.
 
-Additionally creates `self.make`, which is an instance of `cbuild.util.make.Make`
+Additionally creates `self.make`, which is an instance of `nbuild.util.make.Make`
 for the template, with no other changes.
 
 #### meson
@@ -1412,9 +1428,10 @@ install the contents of the wheel. The `check` will run `pytest` or fail.
 The `make_install_target` is used as a glob pattern to match built wheels.
 
 <a id="subpackages"></a>
+
 ### Subpackages
 
-The `cbuild` system has support for subpackages. Subpackages are
+The `nbuild` system has support for subpackages. Subpackages are
 regular packages repository-wise, except they are built as a part of
 some main package's process, and are created from its files.
 
@@ -1444,9 +1461,9 @@ def ...
 
 The subpackage will only be defined if the condition argument is `True`.
 **Note that this is the only way subpackages should ever be conditional in.**
-Generally it applies that if the subpackage symlink exists in `cports`, there
+Generally it applies that if the subpackage symlink exists in `nports`, there
 should always be a decorated subpackage function. The reason for this is that
-`cbuild` should be aware of any subpackage the template may generate, without
+`nbuild` should be aware of any subpackage the template may generate, without
 regard to whether it will be generated or not. This is useful as it allows
 for better introspection/analysis by tooling.
 
@@ -1595,6 +1612,7 @@ templates also have builtin whitelists for split subpackage data, e.g.
 You can turn on/off splitting only static libraries with `splitstatic`.
 
 <a id="automatic_deps"></a>
+
 ### Automatic Dependencies
 
 The build system includes an automatic dependency scanner. This allows you
@@ -1720,6 +1738,7 @@ exist, it is possible to set `install_if` to an empty array in the
 subpackage definition.
 
 <a id="template_options"></a>
+
 ### Template Options
 
 There are various options you can specify as a part of the `options` variable.
@@ -1734,7 +1753,7 @@ the template including for subpackages:
   container is available.
 * `parallel` *(true)* By disabling this, you can enforce single-threaded
   builds for the template. By default the number of build jobs passed
-  by `cbuild` is respected. Note that this does not influence LTO linker
+  by `nbuild` is respected. Note that this does not influence LTO linker
   threads.
 * `debug` *(true)* By default, debug packages (`-dbg`) are generated if
   there are any strippable debug symbols. By setting this to `false`,
@@ -1784,14 +1803,14 @@ the template including for subpackages:
 The following options apply to a single package and need to be specified
 for subpackages separately if needed:
 
-* `textrels` *(false)* By default, if `cbuild` finds textrels within any
+* `textrels` *(false)* By default, if `nbuild` finds textrels within any
   ELF files in the packages, it will error. It is possible to override
   this by enabling the option.
-* `execstack` *(false)* By default, if `cbuild` finds ELF files with
+* `execstack` *(false)* By default, if `nbuild` finds ELF files with
   executable stack, it will error. It is possible to override this by
   enabling the option. Any ELF file that either does not have `PT_GNU_STACK`
   or has the `1 << 0` bit set in its `flags`.
-* `foreignelf` *(false)* By default, if `cbuild` finds ELF files that
+* `foreignelf` *(false)* By default, if `nbuild` finds ELF files that
   have a foreign machine architecture (checked by matching against the
   `libc` of the target), it will error. It is possible to override this
   by enabling this option. Usually this is a wrong thing to do, but for
@@ -1799,13 +1818,13 @@ for subpackages separately if needed:
 * `empty` *(false)* By default, empty packages will raise an error, unless
   the build style is `meta`; this can be used to override it. Packages that
   are marked empty and have contents will instead error then.
-* `keepempty` *(false)* By default, `cbuild` will prune all empty directories
+* `keepempty` *(false)* By default, `nbuild` will prune all empty directories
   from every package. This can be used to override that. It should almost
   never be used. However, there are some cases, notably `base-files`, where
   keeping empty directories is intended. In most cases, when an empty directory
   is desired, a placeholder file called `.empty` should be created in it, which
   ensures that users cannot accidentally `rmdir` the directory.
-* `keeplibtool` *(false)* By default, `cbuild` will remove libtool `.la` files
+* `keeplibtool` *(false)* By default, `nbuild` will remove libtool `.la` files
   everywhere. This lets you preserve them in specific rare cases.
 * `brokenlinks` *(false)* By default, broken symlinks that cannot be resolved
   within any subpackage will result in an error. You can override this behavior
@@ -1818,7 +1837,7 @@ for subpackages separately if needed:
 * `lintstatic` *(true)* Normally, static libraries are not allowed to be in
   the main package. In specific rare cases, this may be overridden.
 * `scantrigdeps` *(true)* This specifies whether trigger dependencies should
-  be scanned. See the `src/cbuild/hooks/pre_pkg/007_trigger_deps.py` for
+  be scanned. See the `src/nbuild/hooks/pre_pkg/007_trigger_deps.py` for
   detailed list.
 * `scanrundeps` *(true)* This specifies whether automatic runtime dependencies
   are scanned for the package. By default, ELF files are scanned for their
@@ -1861,9 +1880,10 @@ for subpackages separately if needed:
 * `splitdoc` *(true)* This is like `autosplit`, but only for docs.
 
 <a id="hardening_options"></a>
+
 ### Hardening Options
 
-The `cbuild` system implements an automatic way to deal with toggling
+The `nbuild` system implements an automatic way to deal with toggling
 different hardening options. Several hardening options are implicit
 as a part of our toolchain and do not have toggleable options; those
 include FORTIFY and RELRO.
@@ -1902,6 +1922,7 @@ the template and put in a comment for later (with information on how to reproduc
 the crash).
 
 <a id="tools"></a>
+
 ### Tools and Tool Flags
 
 The build system also provides separate management of tools for convenience.
@@ -1976,6 +1997,7 @@ There are many more variables that are implicitly exported into the
 environment, but those are documented elsewhere.
 
 <a id="triggers"></a>
+
 ### Triggers
 
 The packaging system lets you provide custom triggers.
@@ -2000,9 +2022,10 @@ Triggers are passed the directory paths that resulted in the trigger
 being invoked.
 
 <a id="build_profiles"></a>
+
 ## Build Profiles
 
-The `cbuild` system allows for flexible definition of profiles for
+The `nbuild` system allows for flexible definition of profiles for
 different target architectures. These profiles are used for both
 native and cross builds.
 
@@ -2028,7 +2051,7 @@ RUSTFLAGS =
 ```
 
 These are also the fields it has to define. The `triplet` must always
-be the full triplet (`cbuild` will take care of building the short
+be the full triplet (`nbuild` will take care of building the short
 triplet from it if needed). The compiler flags are optional.
 
 The `repos` field specifies which categories are provided by remote
@@ -2046,7 +2069,7 @@ it can specify is the `flags` section, and possibly also additional
 per-architecture flags (e.g. `flags.riscv64`). User specified flags
 from global config are ignored when bootstrapping.
 
-The `cbuild` system provides special API to manipulate profiles, and
+The `nbuild` system provides special API to manipulate profiles, and
 you can utilize any arbitrary profiles within one build if needed.
 More about that in the respective API sections, but the API allows
 one to retrieve compiler flags in proper architecture-specific way,
@@ -2095,6 +2118,7 @@ In general, you will not want to use the profile's methods, and the member
 variables are strictly read only.
 
 <a id="build_environment"></a>
+
 ## Build Environment
 
 This section of the documentation defines what the build environment
@@ -2102,7 +2126,7 @@ looks like when building a package.
 
 Except when bootstrapping from scratch, most of the actual build process
 runs sandboxed. The sandboxing is provided by the means of a minimal
-Chimera container (as defined by the `main/base-chroot` package) and
+Neve container (as defined by the `main/base-chroot` package) and
 the `bwrap` tool (`bubblewrap`), which utilizes Linux Namespaces to
 provide a safe and unprivileged environment.
 
@@ -2144,9 +2168,9 @@ The following environment variables are exported into the sandbox:
 * `UNAME_m` Set to the preferred host architecture. Read by `uname(1)`.
 * `PYTHONUNBUFFERED` Set to `1`. This disables output buffering on
   Python subprocesses, which allows output to be printed right away,
-  since `cbuild` captures it for logging purposes.
+  since `nbuild` captures it for logging purposes.
 * `SOURCE_DATE_EPOCH` The timestamp for reproducible builds.
-* `CBUILD_STATEDIR` Points to where current package build metadata
+* `nbuild_STATEDIR` Points to where current package build metadata
   is stored, such as stamps for finished phases.
 * `CFLAGS` Target C compiler flags.
 * `FFLAGS` Target Fortran compiler flags.
@@ -2160,10 +2184,10 @@ The following environment variables are exported into the sandbox:
 * `PKG_CONFIG` Target `pkg-config`.
 * `STRIPBIN` Set to a special wrapper that avoids stripping the file.
   This is in order to bypass `install(1)` `-s` argument.
-* `CBUILD_TARGET_MACHINE` Target `apk` machine architecture.
-* `CBUILD_TARGET_TRIPLET` Full target triplet (as described in profile).
+* `nbuild_TARGET_MACHINE` Target `apk` machine architecture.
+* `nbuild_TARGET_TRIPLET` Full target triplet (as described in profile).
   This is not exported during stage0 bootstrap.
-* `CBUILD_TARGET_SYSROOT` Target sysroot path. Host sysroot is always `/`.
+* `nbuild_TARGET_SYSROOT` Target sysroot path. Host sysroot is always `/`.
 * `BUILD_CFLAGS` Host C compiler flags.
 * `BUILD_FFLAGS` Host Fortran compiler flags.
 * `BUILD_CXXFLAGS` Host C++ compiler flags.
@@ -2174,8 +2198,8 @@ The following environment variables are exported into the sandbox:
 * `BUILD_CPP` Host C preprocessor.
 * `BUILD_LD` Host linker.
 * `BUILD_PKG_CONFIG` Host `pkg-config`.
-* `CBUILD_HOST_MACHINE` Host `apk` machine architecture.
-* `CBUILD_HOST_TRIPLET` Full host triplet (as described in profile).
+* `nbuild_HOST_MACHINE` Host `apk` machine architecture.
+* `nbuild_HOST_TRIPLET` Full host triplet (as described in profile).
   This is not exported during stage0 bootstrap.
 
 All `BUILD_foo` variables are also exported as `foo_FOR_BUILD`.
@@ -2184,7 +2208,7 @@ Additionally, when using `ccache`, the following are also exported:
 
 * `CCACHEPATH` The path to `ccache` toolchain symlinks.
 * `CCACHE_DIR` The path to `ccache` data.
-* `CCACHE_BASEDIR` Set to the `cbuild`-set current working directory.
+* `CCACHE_BASEDIR` Set to the `nbuild`-set current working directory.
 * `CCACHE_TEMPDIR` Set to `/tmp/ccache`.
 
 When using `sccache` and it is installed, the following are exported:
@@ -2231,12 +2255,13 @@ This includes the network namespace, so there is no more network
 access within the sandbox at this point.
 
 <a id="hooks"></a>
+
 ## Hooks and Invocation
 
-The `cbuild` system is largely driven by hooks. A hook is a Python source
-file present in `cbuild/hooks/<section>`. Hooks take care of things such
+The `nbuild` system is largely driven by hooks. A hook is a Python source
+file present in `nbuild/hooks/<section>`. Hooks take care of things such
 as sources handling, environment setup, linting, cleanups, and so on. Some
-things are hardcoded within `cbuild` and not done by hooks.
+things are hardcoded within `nbuild` and not done by hooks.
 
 The following hook types are allowed:
 
@@ -2295,6 +2320,7 @@ This is the overall call order of hooks and phases:
 After the `pkg` hooks, packages are generated and registered.
 
 <a id="custom_targets"></a>
+
 ### Custom Targets
 
 It is possible to define custom target functions like so:
@@ -2305,7 +2331,7 @@ def _(self):
     ...
 ```
 
-This can then be invoked like `./cbuild invoke-custom my-target main/mypkg`.
+This can then be invoked like `./nbuild invoke-custom my-target main/mypkg`.
 The second argument specifies which regular packaging steps have to run before
 running this.
 
@@ -2322,6 +2348,7 @@ if self.current_target == "custom:my-target":
 ```
 
 <a id="staging"></a>
+
 ## Staging
 
 The build system implements staging. This means packages do not get registered
@@ -2332,13 +2359,13 @@ Every built package gets staged first. There is a specific staging overlay
 repo for every repository, but the unstaging algorithm considers them all
 a single global stage.
 
-When you invoke a build (`./cbuild pkg category/foo`), it must first finish.
+When you invoke a build (`./nbuild pkg category/foo`), it must first finish.
 This includes building potential missing dependencies. Once the entire
 potential batch is built, the unstaging algorithm kicks in and does the
 following:
 
 1) If the user has explicitly requested that the package remains staged,
-   nothing is done. This can be done via a command line option to `cbuild`
+   nothing is done. This can be done via a command line option to `nbuild`
    or using the configuration file.
 2) The system collects all staging overlays currently present.
 3) Every staging overlay is searched for packages. These packages are
@@ -2390,11 +2417,12 @@ Additionally, it is there for convenience, to be notified of potential
 rebuilds to be done, as well as so one does not forget.
 
 <a id="template_api"></a>
+
 ## Template API
 
-The public API of `cbuild` that is accessible from templates consists of
+The public API of `nbuild` that is accessible from templates consists of
 exactly 2 parts: the API available as a part of the template handle, and
-the API in the `cbuild.util` module namespace.
+the API in the `nbuild.util` module namespace.
 
 The template handle provides the important APIs that cannot be reimplemented
 using other APIs. The utility namespace, on the other hand, provides things
@@ -2407,6 +2435,7 @@ only available during that time, and never after that, so do not attempt
 to access them from inside functions.
 
 <a id="api_builtins"></a>
+
 ### Builtins
 
 #### @subpackage(name, cond = True)
@@ -2426,6 +2455,7 @@ also called `self`. You can obviously rely on that, just do not rely on it
 being implicitly defined.
 
 <a id="api_handle"></a>
+
 ### Handle API
 
 The handle API consists of 3 classes. The `Package` class provides base API
@@ -2437,12 +2467,13 @@ subpackages.
 Both `Template` and `Subpackage` inherit from `Package`.
 
 <a id="class_package"></a>
+
 #### Package Class
 
 Shared API for both templates and subpackages.
 
 All APIs may raise errors. The user is not supposed to handle the errors,
-they will be handled appropriately by `cbuild`.
+they will be handled appropriately by `nbuild`.
 
 Filesystem APIs take strings or `pathlib` paths. They also allow the special
 prefix `>/` in the path as a shorthand for `self.destdir`, and the special
@@ -2495,14 +2526,14 @@ class Logger:
 
 The `out_plain()` method writes out the given string plus the `end`.
 The `out()` method does the same, but in a colored format and prefixed
-with the `=> ` string.
+with the `=>` string.
 
 The `warn()` method prints out `=> WARNING: <msg><end>` in a warning
 color. The `out_red` is like `out`, except in red, providing a base for
 printing out errors.
 
 Whether the color-using methods use colors or not depends on the current
-configuration of `cbuild` (arguments, environment, whether we are in an
+configuration of `nbuild` (arguments, environment, whether we are in an
 interactive terminal are all things that may disable colors).
 
 ##### self.options
@@ -2549,7 +2580,7 @@ one of the following:
 
 * `{self.pkgname}-{self.pkgver}-r{self.pkgrel}`
 * `{self.pkgname}`
-* `cbuild`
+* `nbuild`
 
 This depends on the stage of the build.
 
@@ -2633,7 +2664,7 @@ a directory.
 
 Mimics the behavior of the Unix `mkdir` tool, possibly with `-p`.
 
-##### def rm(self, path, recursive = False, force = False, glob = False):
+##### def rm(self, path, recursive = False, force = False, glob = False)
 
 Removes the path `path`. Can be either a file or a directory. If it is
 a directory (symlinks are treated as files) and `recursive` is not `True`,
@@ -2698,6 +2729,7 @@ for p in self.find("foo", "*.py"):
 ```
 
 <a id="class_template"></a>
+
 #### Template Class
 
 APIs not available on subpackages.
@@ -2706,13 +2738,13 @@ APIs not available on subpackages.
 
 The number of configured jobs to use for building. This is not affected
 by whether parallel builds are disabled via options, always referring
-to the number provided by `cbuild`.
+to the number provided by `nbuild`.
 
 ##### self.conf_link_threads
 
 The number of linker threads (and LTO jobs, if enabled) to use. This is
 not affected by whether parallel builds are disabled via options, always
-referring to the number provided by `cbuild`.
+referring to the number provided by `nbuild`.
 
 ##### self.make_jobs
 
@@ -2739,7 +2771,7 @@ it can be `1` (when compiling using the sandbox generated by stage 0) or
 
 ##### self.run_check
 
-Whether running the `check` phase is enabled by `cbuild`. This is `False` for
+Whether running the `check` phase is enabled by `nbuild`. This is `False` for
 cross builds even if testing is otherwise enabled. Keep in mind that setting
 `!check` in `options` will not make this `False`, as it's set before options
 are read.
@@ -2750,21 +2782,21 @@ environment regardless of settings.
 
 ##### self.build_dbg
 
-Whether building `dbg` packages is enabled by `cbuild`.
+Whether building `dbg` packages is enabled by `nbuild`.
 
 ##### self.use_ccache
 
-Whether using `ccache` is enabled by `cbuild`.
+Whether using `ccache` is enabled by `nbuild`.
 
 ##### self.use_sccache
 
-Whether using `sccache` is enabled by `cbuild`.
+Whether using `sccache` is enabled by `nbuild`.
 
 ##### self.cwd
 
 The current working directory of the template. This does not mirror the
 actual current working directory of the OS; it is the directory that is
-used strictly by the Python APIs of `cbuild`.
+used strictly by the Python APIs of `nbuild`.
 
 ##### self.chroot_cwd
 
@@ -2780,7 +2812,7 @@ The absolute path to the directory with `template.py`.
 ##### self.files_path
 
 The absolute path to the `files` directory of the template. This directory
-contains auxiliary files needed for the build, shipped in `cports`.
+contains auxiliary files needed for the build, shipped in `nports`.
 
 ##### self.patches_path
 
@@ -3154,6 +3186,7 @@ final destination path, i.e. `self.rename("foo/bar", "baz", keep_name=True)`
 becomes `foo/baz/bar`.
 
 <a id="class_subpackage"></a>
+
 #### Subpackage Class
 
 These methods are only available on subpackage objects. You cannot create
@@ -3201,7 +3234,7 @@ def _(self):
 ##### def take_devel(self, man = "23")
 
 This function will `take` everything that should usually belong in a
-development package. See the implementation in `cbuild/core/template.py`
+development package. See the implementation in `nbuild/core/template.py`
 for the current coverage.
 
 Note that its handling of `.so` files in `/usr/lib` is a bit special; it will
@@ -3218,7 +3251,7 @@ This function will `take` everything that should usually belong in a
 ##### def take_doc(self)
 
 This function will `take` everything that should usually belong in a
-documentation package. See the implementation in `cbuild/core/template.py`
+documentation package. See the implementation in `nbuild/core/template.py`
 for the current coverage.
 
 ##### def take_libs(self)
@@ -3297,15 +3330,16 @@ self.make_link("usr/bin/foo", "bar")
 ```
 
 <a id="api_util"></a>
+
 ### Utility API
 
-Utility APIs exist in the `cbuild.util` namespace. They provide building
+Utility APIs exist in the `nbuild.util` namespace. They provide building
 blocks for templates, built using the other available public API. You do
 not have to actually use any of these building blocks from technical
 standpoint, but you are highly encouraged to use them in practice, as
 they simplify the template logic greatly.
 
-#### cbuild.util.cargo
+#### nbuild.util.cargo
 
 Utilities for managing Cargo-based Rust projects.
 
@@ -3317,7 +3351,7 @@ You will need to do this for every crate you patch, as Cargo verifies the
 checksums of every file specified in there. Clearing effectively allows
 easy distro patching.
 
-#### cbuild.util.cmake
+#### nbuild.util.cmake
 
 A wrapper for management of CMake projects.
 
@@ -3382,7 +3416,7 @@ The environment is taken from `env`, on top of default environment. The
 `CTEST_PARALLEL_LEVEL` environment variable is by default set to the number
 of jobs, and `CTEST_OUTPUT_ON_FAILURE` is set to `1`.
 
-#### cbuild.util.compiler
+#### nbuild.util.compiler
 
 A simple wrapper to directly invoke a compiler.
 
@@ -3390,7 +3424,7 @@ A simple wrapper to directly invoke a compiler.
 
 A base class for a GNU-like compiler driver (such as Clang or GCC).
 
-###### def __init__(self, tmpl, cexec, default_flags, default_ldflags)
+###### def **init**(self, tmpl, cexec, default_flags, default_ldflags)
 
 The constructor. Sets the fields `template`, `cexec`, `flags` and `ldflags`.
 
@@ -3418,7 +3452,7 @@ with all its arguments will be printed out via the logger before execution.
 
 A C compiler. Like `GnuLike`, but more automatic.
 
-###### def __init__(self, tmpl, cexec = None)
+###### def **init**(self, tmpl, cexec = None)
 
 Calls `GnuLike.__init__`. If `cexec` is `None`, it defaults to `tmpl.get_tool("CC")`.
 The `flags` are `tmpl.get_cflags()`, while `ldflags` are `tmpl.get_ldflags()`.
@@ -3427,12 +3461,12 @@ The `flags` are `tmpl.get_cflags()`, while `ldflags` are `tmpl.get_ldflags()`.
 
 A C++ compiler. Like `GnuLike`, but more automatic.
 
-###### def __init__(self, tmpl, cexec = None)
+###### def **init**(self, tmpl, cexec = None)
 
 Calls `GnuLike.__init__`. If `cexec` is `None`, it defaults to `tmpl.get_tool("CXX")`.
 The `flags` are `tmpl.get_cxxflags()`, while `ldflags` are `tmpl.get_ldflags()`.
 
-#### cbuild.util.gnu_configure
+#### nbuild.util.gnu_configure
 
 A wrapper for handling of GNU Autotools and compatible projects.
 
@@ -3471,7 +3505,7 @@ are also passed for cross mode:
 * `--with-libtool-sysroot={sysroot}`
 
 When cross compiling, autoconf caches are exported into the environment, which
-are described by the files in `cbuild/misc/autoconf_cache`. The `common_linux`
+are described by the files in `nbuild/misc/autoconf_cache`. The `common_linux`
 is parsed first, then `musl-linux`, `endian-(big|little)`, and architecture
 specific files.
 
@@ -3494,7 +3528,7 @@ environment, after the cache files (so the environment dictionary can override
 any caches). This also uses `pkg.configure_env` (`env` takes precedence over it).
 
 The environment variable `MAKE` is implicitly set for this run, with the value
-of what the `cbuild.util.make.Make(pkg).get_command()` would be.
+of what the `nbuild.util.make.Make(pkg).get_command()` would be.
 
 ##### def get_make_env()
 
@@ -3506,19 +3540,19 @@ set to `/usr/lib64 /usr/lib32 /usr/lib /lib /usr/local/lib`.
 ##### def replace_guess(pkg)
 
 Given a `Template`, finds files named `*config*.guess` and `*config*.sub`
-recursively and replaces them with fresh copies from `cbuild/misc`.
+recursively and replaces them with fresh copies from `nbuild/misc`.
 
 This provides an automated fixup for when projects ship with outdated
 `config.guess` and `config.sub` which frequently miss `musl` support
 or new targets such as `riscv64`.
 
-#### cbuild.util.make
+#### nbuild.util.make
 
 A wrapper around Make and Make-style tools.
 
 ##### class Make
 
-###### def __init__(self, tmpl, jobs = None, command = None, env = {}, wrksrc = None)
+###### def **init**(self, tmpl, jobs = None, command = None, env = {}, wrksrc = None)
 
 Initializes the Make. The arguments can provide default values for various
 settings, which can further be overridden in sub-invocations.
@@ -3600,7 +3634,7 @@ other arguments are passed as is.
 * Then followed by `self.template.make_env`
 * Then followed by the rest
 
-#### cbuild.util.meson
+#### nbuild.util.meson
 
 A wrapper for management of Meson projects.
 
@@ -3663,6 +3697,7 @@ Like running `invoke` with `test` command. The `--no-rebuild` as well as
 are passed, followed by any `extra_args`.
 
 <a id="update_check"></a>
+
 ## Update Check
 
 The system offers a way to check templates for updates. In a lot of cases,
@@ -3672,13 +3707,13 @@ there is no need to do anything.
 You can invoke it like this:
 
 ```
-$ ./cbuild update-check main/mypkg
+./nbuild update-check main/mypkg
 ```
 
 This may have output like this, for example:
 
 ```
-$ ./cbuild update-check main/llvm
+$ ./nbuild update-check main/llvm
 llvm-12.0.0 -> llvm-12.0.1
 llvm-12.0.0 -> llvm-13.0.0
 ```
@@ -3766,11 +3801,12 @@ It also has methods with the same names as the functions you can define.
 You can call them from your custom functions.
 
 <a id="contributing"></a>
+
 ## Contributing
 
 If you want to contribute, you need to take the following steps:
 
-1) Fork the `cports` repository
+1) Fork the `nports` repository
 2) Read `CONTRIBUTING.md`
 3) Work on your contribution, ensuring quality requirements are met
    (if you are unsure, do not hesitate to ask for help)
@@ -3779,6 +3815,7 @@ If you want to contribute, you need to take the following steps:
    merged right away, otherwise you will be asked to make changes
 
 <a id="help"></a>
+
 ## Help
 
 If you still need help, you should be able to get your answers in our

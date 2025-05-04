@@ -1,4 +1,4 @@
-# Git basics with cports
+# Git basics with nports
 
 There is a chance you are unfamiliar with how Git works and it's giving you
 some trouble. This is not a replacement for a proper Git guide per se but
@@ -7,7 +7,7 @@ aims to provide some tips for basic foolproof usage.
 In general, do not use GitHub's UI for anything but creating a pull request.
 Everything else should be done on your computer using local Git tools.
 
-## Cloning cports
+## Cloning nports
 
 After you have forked the repository on GitHub, you will need to clone your
 personal fork to have a local copy. To be able to push changes into it, you
@@ -17,7 +17,7 @@ on GitHub).
 Typically this will involve the following:
 
 ```
-$ git clone git@github.com:yourusername/cports.git
+git clone git@github.com:yourusername/nports.git
 ```
 
 Git has a concept of "remotes". A remote is basically a pair of URLs (one
@@ -30,26 +30,26 @@ e.g. to avoid having to type in your SSH key passphrase every time you pull.
 You can alter that like this:
 
 ```
-$ git remote set-url origin https://github.com/yourusername/cports.git
-$ git remote set-url --push origin git@github.com:yourusername/cports.git
+git remote set-url origin https://github.com/yourusername/nports.git
+git remote set-url --push origin git@github.com:yourusername/nports.git
 ```
 
 The `set-url` command will alter both URLs, so you need to manually reset
 just the push URL afterwards.
 
-In any case, you will also want a remote for Chimera's `cports` repository,
+In any case, you will also want a remote for Neve's `nports` repository,
 which you will use to sync changes back into your fork. As you most likely
 do not have push access there anyway, let's use the HTTPS URL:
 
 ```
-$ git remote add upstream https://github.com/chimera-linux/cports.git
+git remote add upstream https://github.com/chimera-linux/nports.git
 ```
 
 Configure your email and name for the repository as well:
 
 ```
-$ git config user.email "me@email.provider"
-$ git config user.name "Firstname Lastname"
+git config user.email "me@email.provider"
+git config user.name "Firstname Lastname"
 ```
 
 It is acceptable to use an anonymous handle instead of a full name for
@@ -69,7 +69,7 @@ such as the commit message and author name and email, identified by a specific
 hash. A Git history is a chain of commits, all the way to the first one.
 
 Git also supports branches. A branch represents a particular history. The
-`master` branch is the primary one in `cports`. You can have custom branches
+`master` branch is the primary one in `nports`. You can have custom branches
 which diverge from the `master` branch in their own ways.
 
 Git histories are immutable, so changing it results in a new history starting
@@ -89,8 +89,8 @@ either the older `checkout` command or the newer (and as of version 2.44,
 experimental) `switch` command. These two are equivalent:
 
 ```
-$ git checkout -b my-custom-branch-name
-$ git switch -c my-custom-branch-name
+git checkout -b my-custom-branch-name
+git switch -c my-custom-branch-name
 ```
 
 The `-b` and `-c` arguments respectively tell Git to create a new branch
@@ -109,10 +109,10 @@ of your cloned repository.
 You can create a worktree like so:
 
 ```
-$ git worktree add additional_tree
+git worktree add additional_tree
 ```
 
-This will create a directory `additional_tree` containing the `cports`
+This will create a directory `additional_tree` containing the `nports`
 structure, but separately. You can create a worktree out of an unchecked
 branch by passing that branch name afterthe directory name. By default,
 if you do not pass anything, a new branch will be created, with the same
@@ -126,22 +126,22 @@ can only have one worktree for any particular branch.
 ## Creating changes
 
 With these things out of the way, you can make whatever changes you like in
-the `cports` tree. You will then want to make them into commits, ensuring
-that those commits follow Chimera's rules.
+the `nports` tree. You will then want to make them into commits, ensuring
+that those commits follow Neve's rules.
 
 To create a commit, you will need to first tell Git which changes should be
 included in the commit. The `git add` command is for that. You can run it like
 so:
 
 ```
-$ git add some/path/to/add
+git add some/path/to/add
 ```
 
 Sometimes, files may have to be removed instead. The `git rm` command is for
 that. You run it equivalently:
 
 ```
-$ git rm some/path/to/remove
+git rm some/path/to/remove
 ```
 
 See `git add --help` and `git rm --help` for various specifics. There is also
@@ -149,7 +149,7 @@ See `git add --help` and `git rm --help` for various specifics. There is also
 
 Afterwards, you can create your commit. Type `git commit`. A text editor will
 come up, where you need to specify your commit message. A commit message
-consists of a first line, which is subject to Chimera's rules when it comes
+consists of a first line, which is subject to Neve's rules when it comes
 to its formatting. The first line should be 50 characters or less, and should
 be followed by an empty line. The other lines should be 72 characters or less,
 and you should put a more detailed description of what your commit does there,
@@ -172,13 +172,13 @@ which makes this easier.
 First, fetch the changes from the `upstream` remote:
 
 ```
-$ git fetch upstream
+git fetch upstream
 ```
 
 Now, while in the branch you are synchronizing, use the `rebase` command:
 
 ```
-$ git rebase upstream/master
+git rebase upstream/master
 ```
 
 The `rebase` command is very useful not only for this; it basically takes
@@ -197,9 +197,9 @@ commit that failed to apply. Locate the files that are conflicting, alter them
 to what they should be, then do the following:
 
 ```
-$ git add conflicting/file
-$ git commit
-$ git rebase --continue
+git add conflicting/file
+git commit
+git rebase --continue
 ```
 
 Repeat as many times as it takes until your history is clean. If things get
@@ -216,7 +216,7 @@ Let's say you want to take the last 20 commits for interactive rebase.
 Run the following:
 
 ```
-$ git rebase -i HEAD~20
+git rebase -i HEAD~20
 ```
 
 A text editor will open. You will see the list of your 20 commits in there,
@@ -249,7 +249,7 @@ abort the rebase.
 If you want to push the changes to the remote, use the `push` command:
 
 ```
-$ git push origin my-branch
+git push origin my-branch
 ```
 
 If no PR exists yet, the output of that command will include a link to
@@ -260,7 +260,7 @@ have to force the push. By default, Git does not allow altering history,
 and this is what `--force` is for:
 
 ```
-$ git push --force origin my-branch
+git push --force origin my-branch
 ```
 
 Every time you push to your branch, the pull request associated with it
@@ -269,11 +269,11 @@ Every time you push to your branch, the pull request associated with it
 ## Other tips and what not to do
 
 If you are not experienced with Git, you should pretend the `merge` command
-does not exist. Chimera keeps a flat history, so all the workflows use
+does not exist. Neve keeps a flat history, so all the workflows use
 rebasing instead. Some other projects use merge workflows instead, where
 the current branch's history itself is branching; whenever you `merge` another
 branch into a branch, it will create a special merge commit, representing
-the sum of the commits that were merged. Chimera does not do this because
+the sum of the commits that were merged. Neve does not do this because
 it makes the history more confusing.
 
 This is also why GitHub's web tools should not be used. For example, the
@@ -285,7 +285,7 @@ to a specific commit or another object (e.g. another branch), you can also
 use it, e.g. `git reset --hard another-branch`.
 
 Use `git log` to inspect the current history. The `git log --graph` command
-will also show how the history branches. In Chimera's case, it will be pretty
+will also show how the history branches. In Neve's case, it will be pretty
 much flat all the time.
 
 Use `git grep` to quickly search within a repository. Use `git show` to view

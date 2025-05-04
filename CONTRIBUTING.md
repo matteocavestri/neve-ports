@@ -1,6 +1,6 @@
-# Contributing to cports
+# Contributing to nports
 
-While Chimera is not made of only `cports`, most people will probably want
+While Neve is not made of only `nports`, most people will probably want
 to contribute here.
 
 ## Getting started
@@ -42,7 +42,7 @@ Using a correct commit message is also important:
 * Updates should similarly use `category/pkgname: update to <version>`.
 * Non-update changes to templates should use `category/pkgname: custom message`.
 * Removals should use `category/pkgname: remove`.
-* Changes to `cbuild` should use `cbuild: custom message`.
+* Changes to `nbuild` should use `nbuild: custom message`.
 * Changes to other parts should use the same format but relating to the thing
   they change, e.g. for `Packaging.md` changes it's `packaging: ...` and so on.
 * Changes to multiple things in a category should use `*`, e.g. for `user/foo`
@@ -66,7 +66,7 @@ into that branch, the command line will offer you a link to create your PR.
 If there are any issues with your PR, a reviewer will point them out and possibly
 suggest changes. Follow any review instructions until the changes are approved.
 
-There is no CLA in Chimera, likewise there is no copyright assignment or any
+There is no CLA in Neve, likewise there is no copyright assignment or any
 such thing.
 
 ## Getting your changes merged

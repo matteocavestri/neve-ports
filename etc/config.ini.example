@@ -1,4 +1,4 @@
-# This is a reference for the cbuild configuration file.
+# This is a reference for the nbuild configuration file.
 # Every value specified here is the system's default.
 
 [alias]
@@ -8,7 +8,7 @@
 # options related to your host apk
 [apk]
 # the fallback apk command to use
-# also overridden by environment variable CBUILD_APK_PATH
+# also overridden by environment variable nbuild_APK_PATH
 # this is used to bootstrap, but once we have a bldroot,
 # static apk from inside of it is used always
 command = apk
@@ -18,7 +18,7 @@ repo = https://repo.chimera-linux.org/current
 # options related to building packages
 [build]
 # the bwrap command to use
-# also overriden by environment variable CBUILD_BWRAP_PATH
+# also overriden by environment variable nbuild_BWRAP_PATH
 bwrap = bwrap
 # whether to display build time for each log line
 timing = yes
@@ -40,7 +40,7 @@ thinlto_cache = no
 # thinlto cache size of enabled
 thinlto_cache_size = 10g
 # default path where all caches are stored (absolute or relative to cports)
-cbuild_cache_path = cbuild_cache
+nbuild_cache_path = nbuild_cache
 # whether to run check phase
 check = yes
 # whether checks are allowed to fail (by default they will abort build)

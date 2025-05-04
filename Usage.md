@@ -1,7 +1,7 @@
-# Using cports
+# Using nports
 
-This document provides a comprehensive reference on using the `cports` system,
-more specifically its `cbuild` component.
+This document provides a comprehensive reference on using the `nports` system,
+more specifically its `nbuild` component.
 
 *Table of Contents*
 
@@ -15,7 +15,7 @@ more specifically its `cbuild` component.
 * [Bootstrapping From Source](#bootstrapping)
   * [Bootstrap Requirements](#bootstrap_requirements)
   * [Bootstrap Process](#bootstrap_process)
-* [Cbuild Reference](#cbuild_reference)
+* [nbuild Reference](#nbuild_reference)
   * [Optional Arguments](#optional_arguments)
   * [Commands](#commands)
   * [Configuration File](#config_file)
@@ -24,9 +24,10 @@ more specifically its `cbuild` component.
 * [Help](#help)
 
 <a id="introduction"></a>
+
 ## Introduction
 
-The `cports` collection comes with a specialized build system, `cbuild`. The
+The `nports` collection comes with a specialized build system, `nbuild`. The
 system provides a way for people to build their own binary packages from
 special templates.
 
@@ -34,6 +35,7 @@ If you are looking for instructions on how to write templates, refer to the
 [`Packaging.md`](Packaging.md) instead.
 
 <a id="getting_started"></a>
+
 ## Getting Started
 
 In order to get started with the system, your operating system environment must
@@ -41,6 +43,7 @@ satisfy some requirements. After that, you can use it to build and manage packag
 assuming you have bootstrapped the system.
 
 <a id="requirements"></a>
+
 ### Requirements
 
 **TL;DR:** You need a handful of tools, mainly Python and a few binaries mentioned
@@ -49,7 +52,7 @@ user namespaces, and cgroups. You need to run as a regular user, and not in a
 `chroot`. At least 2GB of RAM per each CPU thread is recommended (all threads are
 used by default).
 
-The `cbuild` tool has relatively few dependencies. You can usually find all of
+The `nbuild` tool has relatively few dependencies. You can usually find all of
 them in any Linux distribution. Additionally, it imposes some requirements on
 the Linux kernel you are running.
 
@@ -61,12 +64,12 @@ The userland dependencies are the following:
 * `git`
 * `bwrap` (from `bubblewrap`)
 
-If running a Chimera system, these tools can all be installed with the
-`base-cbuild-host` metapackage.
+If running a Neve system, these tools can all be installed with the
+`base-nbuild-host` metapackage.
 
 **You need a recent Git snapshot of `apk-tools` at this point.** It is your
-responsibility to ensure that your `apk` is new enough (`cbuild` does some
-rudimentary testing that it's 3.x) and compatible with `cbuild`. Your best
+responsibility to ensure that your `apk` is new enough (`nbuild` does some
+rudimentary testing that it's 3.x) and compatible with `nbuild`. Your best
 bet is to use the same version as is packaged.
 
 You also need Linux kernel 3.8 or newer, with namespaces and cgroups enabled.
@@ -88,23 +91,24 @@ Most distribution kernels should have the options enabled by default.
 In addition to these, you must run the system under a normal user. Running as
 the `root` user will result in early failure.
 
-The environment used to run `cbuild` must not be a `chroot`. Running inside
+The environment used to run `nbuild` must not be a `chroot`. Running inside
 of a `chroot` interferes with the sandbox/namespaces. If you really need to
 use a custom root, you can use `bwrap` to provide functionality equivament
 to `chroot`, as there is nothing preventing nesting namespaces. The command
 would be something like the following:
 
 ```
-$ bwrap --unshare-user --bind /path/to/my/root / --dev /dev --proc /proc --tmpfs /tmp /bin/sh
+bwrap --unshare-user --bind /path/to/my/root / --dev /dev --proc /proc --tmpfs /tmp /bin/sh
 ```
 
-You will also want to ensure you have sufficient RAM available. The `cbuild`
+You will also want to ensure you have sufficient RAM available. The `nbuild`
 system will by default use all CPU threads it can, unless you manually restrict
 it.
 
 If you satisfy all this, you should be good to go.
 
 <a id="how_it_works"></a>
+
 ### How It Works
 
 **TL;DR:** Packages are built in a sandboxed container with limited access to
@@ -119,11 +123,11 @@ appear familiar to you. You should not consider it a clone, since it was written
 from scratch in a completely different language and does a lot of things in a
 different way, but you will notice a lot of similarities.
 
-When building packages with `cbuild`, the build process happens in a minimal
+When building packages with `nbuild`, the build process happens in a minimal
 container. This is what you need namespaces for; they are the building blocks
 of this container.
 
-This container is made up of a minimal collection of Chimera packages, which
+This container is made up of a minimal collection of Neve packages, which
 provide the initial environment. We call it the *build root*. It is essentially
 a sandbox with different restrictions depending on the *phase* of the build.
 
@@ -155,18 +159,18 @@ When building a package, the following happens, in simplified terms:
 
 If you are familiar with `xbps-src`, these are the main conceptual differences:
 
-* Most `cbuild` code is run outside the sandbox. Only specific commands are run
+* Most `nbuild` code is run outside the sandbox. Only specific commands are run
   within, which includes dependency installation, sources extraction, patching,
-  and the build itself. Once files are installed, `cbuild` handles the rest on
+  and the build itself. Once files are installed, `nbuild` handles the rest on
   its own without involving the container. In contrast, `xbps-src` will reexec
   itself inside its sandbox and run everything there.
 * The sandboxing is much more advanced and more strictly enforced. With `xbps-src`
   you don't get any warranty that the build container is intact after anything
-  is run within. In contrast, `cbuild` guarantees that the sandbox is exactly
+  is run within. In contrast, `nbuild` guarantees that the sandbox is exactly
   the same before and after building something in it.
-* The `cbuild` system has no concept of `hostdir`, instead preferring fine
+* The `nbuild` system has no concept of `hostdir`, instead preferring fine
   grained control over every directory.
-* While `xbps-src` provides a "temporary build root" functionality, `cbuild`
+* While `xbps-src` provides a "temporary build root" functionality, `nbuild`
   does not. This is because doing so would introduce reliance on `overlayfs`
   and a custom `suid` binary. This would prevent us from sandboxing properly.
   However, this functionality is not needed, since we guarantee consistency of
@@ -175,19 +179,20 @@ If you are familiar with `xbps-src`, these are the main conceptual differences:
   a fresh temporary root. Unlike with `xbps-src`, this does not create a
   performance problem, as everything is much faster.
 * Created packages are automatically signed. With `xbps-src` this would be a
-  potential security hazard, but `cbuild` can guarantee no malicious process
+  potential security hazard, but `nbuild` can guarantee no malicious process
   can get access to your signing keys. That means repositories generated with
-  `cbuild` are ready to be deployed in remote locations.
+  `nbuild` are ready to be deployed in remote locations.
 * There is only one profile for each architecture for both native and cross
   builds.
 
 <a id="preparing"></a>
+
 ### Preparing
 
 You will need to generate a signing key. You can do that like this:
 
 ```
-$ ./cbuild keygen
+./nbuild keygen
 ```
 
 You can optionally pass your own private key name or path as an argument. If
@@ -207,16 +212,17 @@ If you don't have a key generated and set, you will not be able to build
 packages.
 
 <a id="root_setup"></a>
+
 ### Build Root Setup
 
 The easiest way to bring up a build container is from binary packages, like
 this:
 
 ```
-$ ./cbuild bootstrap
+./nbuild bootstrap
 ```
 
-By default, this will be `bldroot` inside your `cports` directory. If you have
+By default, this will be `bldroot` inside your `nports` directory. If you have
 just done a source bootstrap, there is a chance you don't need to run this as
 the source bootstrap does it for you as the last step. You will need to do this
 if you ever need to re-create it.
@@ -226,19 +232,20 @@ and you are using static host `apk`, you can export the `OPENSSL_CONF` envvar
 with the actual path if you are getting certificate errors.
 
 <a id="building_package"></a>
+
 ### Building a Package
 
 Then, the only thing left to do is to pick a package to build. Let's say,
 `apk-tools` from the `main` category. You need to run this:
 
 ```
-$ ./cbuild pkg main/apk-tools
+./nbuild pkg main/apk-tools
 ```
 
 The inverse syntax
 
 ```
-$ ./cbuild main/apk-tools pkg
+./nbuild main/apk-tools pkg
 ```
 
 is also accepted as a special case.
@@ -249,6 +256,7 @@ metadata and routines declared in the template.
 That's it!
 
 <a id="bootstrapping"></a>
+
 ## Bootstrapping From Source
 
 This is an alternative to binary bootstrap, if you wish to compile the whole
@@ -260,11 +268,12 @@ not guaranteed to work at all times, as we do not check it regularly. Most users
 should stick with bootstrapping from packages.
 
 <a id="bootstrap_requirements"></a>
+
 ### Bootstrap Requirements
 
-The base requirements of `cbuild` still apply. You also need to be running a
+The base requirements of `nbuild` still apply. You also need to be running a
 system based on the `musl` C library. This can be for example Void Linux or
-Chimera itself. Alpine Linux is not supported for direct bootstrapping because
+Neve itself. Alpine Linux is not supported for direct bootstrapping because
 of its patched musl SONAME (which would be more effort to work around).
 
 The system must contain an initial toolchain. It consists of these:
@@ -284,21 +293,22 @@ The system must contain an initial toolchain. It consists of these:
 * Linux kernel headers for userland usage
 
 These can all be found in most distributions' package collections. If running
-a Chimera system, these tools can all be installed with the `base-cbuild-bootstrap`
+a Neve system, these tools can all be installed with the `base-nbuild-bootstrap`
 metapackage.
 
 It is possible to do an almost full source bootstrap on an incompatible system,
-provided that Chimera ships binary packages for the given architecture. See
+provided that Neve ships binary packages for the given architecture. See
 below for an example.
 
 <a id="bootstrap_process"></a>
+
 ### Bootstrap Process
 
-Chimera uses a 4-stage bootstrap process. It is largely automatic and hidden
+Neve uses a 4-stage bootstrap process. It is largely automatic and hidden
 from you. You can invoke it like:
 
 ```
-$ ./cbuild source-bootstrap
+./nbuild source-bootstrap
 ```
 
 Optionally you can stop the process at a specific stage by passing its number
@@ -322,7 +332,7 @@ subpackages (e.g. LLVM debugger) not being built. LTO is also not applied
 for this stage yet.
 
 Stage 2 is considered almost final, being built with all of the features of
-a final system within a Chimera container, including full LTO. Unit tests
+a final system within a Neve container, including full LTO. Unit tests
 are not run yet as they are not considered reliable.
 
 Stage 3 is the final stage, which is a clean rebuild of every bootstrap
@@ -357,37 +367,38 @@ If the bootstrap fails at any point, you can start it again and it will continue
 where it left off. No things already built will be built again.
 
 If you have an incompatible system and wish to do a source bootstrap, you can
-run most of the process provided that Chimera already has existing binary
+run most of the process provided that Neve already has existing binary
 packages for the architecture. In this case, the host system requirements
 are identical to regular builds without source bootstrap.
 
 This is done by pre-bootstrapping a stage 0 environment from binaries:
 
 ```
-$ ./cbuild -b bldroot-stage0 bootstrap
+./nbuild -b bldroot-stage0 bootstrap
 ```
 
 Also see the note about certificates in the "Build Root Setup" section.
 
 After that, you can run the `bootstrap` command as usual. The stage 0 will be
 skipped (but it's largely unnecessary due to the environment already being
-a Chimera environment and not dependent on host toolchain) but every other
+a Neve environment and not dependent on host toolchain) but every other
 stage will build.
 
-<a id="cbuild_reference"></a>
-## Cbuild Reference
+<a id="nbuild_reference"></a>
 
-Every `cbuild` action consists of the following:
+## nbuild Reference
+
+Every `nbuild` action consists of the following:
 
 ```
-$ ./cbuild [optional arguments] COMMAND [command arguments]
+./nbuild [optional arguments] COMMAND [command arguments]
 ```
 
 For commands that take a package name (i.e. a slash is present in the arg),
 you can also swap the order:
 
 ```
-$ ./cbuild [optional arguments] PACKAGE COMMAND [additional arguments]
+./nbuild [optional arguments] PACKAGE COMMAND [additional arguments]
 ```
 
 This is a minor convenience feature as in "perform action on package".
@@ -403,6 +414,7 @@ Otherwise, it is read from the configuration file. If this is not possible,
 the default value is used.
 
 <a id="optional_arguments"></a>
+
 ### Optional Arguments
 
 Optional arguments are global, separate from the command. However, some of them
@@ -423,7 +435,7 @@ only have an effect with specific commands.
 * `--bulk-continue` When doing bulk builds, do not abort the whole bulk if a
   package fails. This may result in incorrect build order.
 * `-c PATH`, `--config PATH` *(default: `etc/config.ini`)* The path to the config
-  file that `cbuild` reads configuration data from. If relative, it is to cports.
+  file that `nbuild` reads configuration data from. If relative, it is to nports.
 * `-C`, `--skip-check` Never attempt to run the `check` phase.
 * `-D`, `--dirty-build` Skip installation of dependencies in the `bldroot`,
   as well as removal of automatic dependencies after successful build, and
@@ -436,7 +448,7 @@ only have an effect with specific commands.
   exists in the local repository.
 * `-G`, `--no-dbg` Do not build `-dbg` packages.
 * `-j JOBS`, `--jobs JOBS` *(default: thread count)* The number of build jobs to
-  use. By default uses the number of CPUs the cbuild run is restricted to (which
+  use. By default uses the number of CPUs the nbuild run is restricted to (which
   is usually the number of CPU threads you have). If you have insufficient RAM
   (at least 2GB per thread is recommended), you will want to lower this. Setting
   to 0 uses the default.
@@ -473,6 +485,7 @@ only have an effect with specific commands.
   checking or has newer versions available.
 
 <a id="commands"></a>
+
 ### Commands
 
 The following commands are recognized:
@@ -493,7 +506,7 @@ The following commands are recognized:
   found but failed to parse), `broken` (if it's explicitly marked `broken`),
   `failed` (if it failed to build) or `ok`. The bulk expressions themselves
   may be a variety of things; if given no expressions, a full bulk build of
-  the whole `cports` is performed, otherwise the inputs may be simple template
+  the whole `nports` is performed, otherwise the inputs may be simple template
   names (like for `pkg`), category names (e.g. `main`), or special expressions.
   The special expressions include `list:XXX` (a list of template names separated
   by whitespace, but given as a single string), `file:PATH` (a file containing
@@ -538,7 +551,7 @@ The following commands are recognized:
   dependency cycles. Only one cycle at a time is printed. The goal is to
   keep the tree free of cycles at all times. Therefore, if you encounter
   a cycle, resolve it and check again.
-* `dump` Dump serialized template metadata in JSON format for all of `cports`.
+* `dump` Dump serialized template metadata in JSON format for all of `nports`.
 * `deps`, `fetch`, `extract`, `prepare`, `patch`, `configure`, `build`, `check`,
   `install`, `pkg` Given an argument of template path (`category/name`) this
   will invoke the build process for the given template up until the given phase.
@@ -555,8 +568,8 @@ The following commands are recognized:
   a path, reindex a specific repository. Only either the host architecture or
   the `-a` architecture are indexed, and the path should not include the
   architecture.
-* `interactive` Enter a prompt where `cbuild` commands can be entered.
-  They take the same syntax as always, just without explicitly calling `cbuild`.
+* `interactive` Enter a prompt where `nbuild` commands can be entered.
+  They take the same syntax as always, just without explicitly calling `nbuild`.
 * `invoke-custom` Takes a target name and a package. Invokes a custom-defined
   template-specific target function. Typically used to handle logic for
   generation of bootstrap bindists, kernel config refresh, and the likes.
@@ -616,6 +629,7 @@ The following commands are recognized:
 * `zap` Remove the build root.
 
 <a id="config_file"></a>
+
 ### Configuration File
 
 Most options can be specified in the configuration file as well. The system
@@ -628,9 +642,10 @@ to specify every option in your own configuration file, this file is only
 for reference.
 
 <a id="cross_compiling"></a>
+
 ## Cross Compiling
 
-The `cbuild` system is fully capable of cross compiling. The same architecture
+The `nbuild` system is fully capable of cross compiling. The same architecture
 profile can be used for both native and cross builds, and in a lot of cases
 the process can be entirely transparent.
 
@@ -641,7 +656,7 @@ Cross compiling is nearly identical to compiling natively. You just need to
 do something like this:
 
 ```
-$ ./cbuild -a aarch64 pkg main/zlib
+./nbuild -a aarch64 pkg main/zlib
 ```
 
 The system will automatically take care of setting up an architecture sysroot
@@ -652,6 +667,7 @@ in your build root, but have the same guarantees as the rest of the root, so
 once they are set up they should never get corrupt.
 
 <a id="ccache"></a>
+
 ## Ccache
 
 The builds will transparently use `ccache` to speed things up if enabled. This
@@ -659,10 +675,11 @@ does not apply to `bootstrap`, which never uses the cache.
 
 You can enable this in your `config.ini` by setting `ccache = yes` in the
 `build` section. The cache will be stored in the `ccache` subdirectory of the
-cbuild caches path (by default `cbuild_cache`, see `config.ini.example` for how
+nbuild caches path (by default `nbuild_cache`, see `config.ini.example` for how
 to change it).
 
 <a id="help"></a>
+
 ## Help
 
 If you still need help, you should be able to get your answers in our
