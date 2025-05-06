@@ -1,11 +1,38 @@
-# TODO Neve-Ports
+# TODO Neve Ports
 
-- [ ] Porting main repository
-  - [ ] Porting main-cbuild
-- [ ] Only use /lib
+## Packages
+
+- [ ] `system`
+  - [ ] Migrate main to system
+  - [ ] `base-nbuild`
+    - [ ] 
+
+- [ ] Make main repo
+  - [ ] Porting main-nbuild
+    - [x] llvm
+    - [x] apk-tools
+    - [x] neveutils (fork from chimerautils)
+    - [x] musl
+    - [x] ncurses
+    - [x] gmake
+    - [x] libarchive
+    - [x] fakeroot
+    - [x] bc-gh
+    - [x] resolvconf
+    - [x] tzdb
+  - [ ] Porting main-nbuild-host
+- [ ] Make base-system package
+- [ ] Make base-system-zfs package
+- [ ] Make base-system-minimal package
+- [ ] Make base-container package
+
+## Build system
+
+- [x] Rewrite cbuild to nbuild
+
+## Infrastructure
+
+## Msc
+
+- [x] Only use /lib (not wordsize dir)
 - [ ] Delete libexec in favour of /lib
-- [ ] Rewrite cbuild to nbuild
-- [ ] Make more optimizations
-- [ ] Sign build
-- [ ] Remove chimera keys
-- [ ] Make development repo
